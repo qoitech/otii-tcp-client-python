@@ -116,3 +116,15 @@ class Otii:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def shutdown(self):
+        """ Shutdown Otii
+
+        """
+        request = {"type": "request", "cmd": "otii_shutdown"}
+        try:
+            response = self.connection.send_and_receive(request)
+            if response["type"] == "error":
+                raise otii_exception.Otii_Exception(response)
+        except otii_connection.DisconnectedException:
+            pass

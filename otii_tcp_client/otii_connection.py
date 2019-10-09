@@ -5,6 +5,9 @@ import socket
 
 from otii_tcp_client import otii_exception
 
+class DisconnectedException(Exception):
+    pass
+
 trans_id = 0
 
 def get_new_trans_id():
@@ -83,7 +86,13 @@ class OtiiConnection:
         self.sock.setblocking(0)
         self.sock.settimeout(timeout_seconds)
         while not json_object:
-            recv_msg += (self.sock.recv(self.recv_buffer)).decode("utf-8")
+            try:
+                recv_data = self.sock.recv(self.recv_buffer)
+                if len(recv_data) == 0:
+                    raise DisconnectedException()
+            except ConnectionResetError:
+                raise DisconnectedException()
+            recv_msg += recv_data.decode("utf-8")
             try:
                 json_data = json.loads(recv_msg)
                 if json_data["type"] == "information":
@@ -99,6 +108,13 @@ class OtiiConnection:
             except ValueError:
                 continue
         return json_data
+
+    def send(self, request):
+        """ Send request without waiting for response.
+
+        """
+        json_msg = json.dumps(request)
+        self.send_request(json_msg)
 
     def send_and_receive(self, request, timeout=3):
         """ Send request and receive response from server.
