@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import sys
+import datetime
 import json
 import socket
+import sys
+import time
 
 from otii_tcp_client import otii_exception
 
@@ -25,23 +27,16 @@ class OtiiConnection:
         sock (socket): Communication socket.
 
     """
-    def __init__(self, address, port, sock=None):
+    def __init__(self, address, port):
         """
         Args:
             address (str): Server IP address.
             port (int): Connection port number.
-            sock (socket, optional): Communication socket.
 
         """
         self.host_address = address
         self.host_port = port
         self.recv_buffer = 4096
-
-        if sock is None:
-            self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
 
     def close_connection(self):
         """ Close connection to server.
@@ -49,25 +44,38 @@ class OtiiConnection:
         """
         self.sock.close()
 
-    def connect_to_server(self):
+    def connect_to_server(self, *, try_for_seconds=0):
         """ Connect to server.
+
+        Args:
+            try_for_seconds (int): Seconds to try to connect.
 
         Returns:
             dict: Decoded JSON connection response.
 
         """
-        try:
-            self.sock.connect((self.host_address, self.host_port))
-        except socket.error as e:
-            self.sock.close()
-            self.sock = None
-            print(e)
-            sys.exit(1)
+        start_time = datetime.datetime.now().timestamp()
+        connected = False
+        while not connected:
+            try:
+                self.sock = socket.socket(
+                    socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.connect((self.host_address, self.host_port))
+                connected = True
+            except socket.error as e:
+                elapsed_time = datetime.datetime.now().timestamp() - start_time
+                if elapsed_time > try_for_seconds:
+                    self.sock.close()
+                    self.sock = None
+                    raise
+                time.sleep(0.5)
+
         self.sock.setblocking(0)
         self.sock.settimeout(3)
         json_data = json.loads((self.sock.recv(self.recv_buffer)).decode("utf-8"))
+        # Remove initial connected response from server
         if json_data["type"] == "information":
-            print("Info: " + json_data["info"])
+            pass
         return json_data
 
     def receive_response(self, timeout_seconds, trans_id):
