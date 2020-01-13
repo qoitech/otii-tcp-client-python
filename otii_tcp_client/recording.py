@@ -119,23 +119,22 @@ class Recording:
                 ]
             return data
         else:
-            to_read = min(count, CHUNK_SIZE)
-            request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel, "index": index, "count":to_read}
+            request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel}
             request = {"type": "request", "cmd": "recording_get_channel_data", "data": request_data}
-            response = self.connection.send_and_receive(request, None)
-            if response["type"] == "error":
-                raise otii_exception.Otii_Exception(response)
-            data = response["data"]
-            read_count = to_read
-            while read_count < count:
-                to_read = min(count, CHUNK_SIZE)
-                request["data"]["index"] = read_count
-                request["data"]["count"] = to_read
+            data = None
+            while count > 0:
+                chunk = min(count, CHUNK_SIZE)
+                request["data"]["index"] = index
+                request["data"]["count"] = chunk
                 response = self.connection.send_and_receive(request, None)
                 if response["type"] == "error":
                     raise otii_exception.Otii_Exception(response)
-                data["values"].extend(response["data"]["values"])
-                read_count += to_read
+                if data == None:
+                    data = response["data"]
+                else:
+                    data["values"].extend(response["data"]["values"])
+                count -= chunk
+                index += chunk
             return data
 
 
