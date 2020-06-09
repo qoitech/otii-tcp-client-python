@@ -387,6 +387,19 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
+    def set_main_current(self, value):
+        """ Set the main current on Arc. Used when the Otii device is set in constant current mode.
+
+        Args:
+            value (float): Current to set in (A).
+
+        """
+        data = {"device_id": self.id, "value": value}
+        request = {"type": "request", "cmd": "arc_set_main_current", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def set_main_voltage(self, value):
         """ Get data entries from a specified channel of a specific recording.
 
@@ -409,6 +422,19 @@ class Arc:
         """
         data = {"device_id": self.id, "value": value}
         request = {"type": "request", "cmd": "arc_set_max_current", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def set_power_regulation(self, mode):
+        """ Set power regulation mode.
+
+        Args:
+            mode (float): One of the following: "voltage", "current", "off".
+
+        """
+        data = {"device_id": self.id, "mode": mode}
+        request = {"type": "request", "cmd": "arc_set_power_regulation", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
