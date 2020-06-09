@@ -24,10 +24,10 @@ def get_channel_data(recording, device_id, channel, index, count):
     Channel Description	    Unit
     mc      Main Current    A
     mv      Main Voltage    V
-    me      Main Energy     Wh
+    me      Main Energy     J
     ac      ADC Current     A
     av      ADC Voltage     V
-    ae      ADC Energy      Wh
+    ae      ADC Energy      J
     sp      Sense+ Voltage  V
     sn      Sense- Voltage  V
     vb      VBUS            V
