@@ -190,6 +190,20 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
+    def get_src_cur_limit_enabled(self):
+        """ Get current state of voltage source current limiting.
+
+        Returns:
+            bool: True if set to constant current, false if set to cut-off.
+
+        """
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_get_src_cur_limit_enabled", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["enabled"]
+
     def get_supplies(self):
         """ Get a list of all available supplies. Supply ID 0 allways refers to the power box.
 
@@ -448,6 +462,19 @@ class Arc:
         """
         data = {"device_id": self.id, "range": range}
         request = {"type": "request", "cmd": "arc_set_range", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def set_src_cur_limit_enabled(self, enable):
+        """ Enable voltage source current limit (CC) operation.
+
+        Args:
+            enable (bool): True means enable constant current, false means cut-off.
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_set_src_cur_limit_enabled", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
