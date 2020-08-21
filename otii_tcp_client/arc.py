@@ -89,6 +89,20 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
+    def get_4wire(self):
+        """ Get the 4-wire measurement state.
+
+        Returns:
+            str: The current state, "cal_invalid", "disabled", "inactive" or "active".
+
+        """
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_get_4wire", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
+
     def get_adc_resistor(self):
         """ Get adc resistor value.
 
@@ -347,6 +361,19 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
         return response["data"]["connected"]
+
+    def set_4wire(self, enable):
+        """ Enable/disable 4-wire measurements using Sense+/-.
+
+        Args:
+            enable (bool): True to enable 4-wire, false to disable
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_set_4wire", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
 
     def set_adc_resistor(self, value):
         """ Set the value of the shunt resistor for the ADC.
