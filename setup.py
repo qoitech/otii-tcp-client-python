@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 import otii_tcp_client  # For accessing __version__ in __init__.py
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name="otii_tcp_client",
@@ -8,7 +11,9 @@ setup(
     version=otii_tcp_client.__version__,
     license="MIT",
     description="Qoitech Otii tcp client library",
-    author="Qoitech",
+    author="Qoitech AB",
+    author_email="support@qoitech.com",
+    long_description=long_description,
     url="https://www.qoitech.com/",
     keywords=["qoitech", "otii", "arc", "tcp"],
     install_requires=[""],
