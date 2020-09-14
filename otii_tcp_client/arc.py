@@ -49,6 +49,19 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
+    def enable_battery_profiling(self, enable):
+        """ This will start the discharge profiling of a connected battery.
+
+        Args:
+            enable (bool): True to start battery profiling, False to stop.
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_enable_battery_profiling", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def enable_channel(self, channel, enable):
         """ Enable or disable measurement channel.
 
@@ -88,6 +101,20 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def get_4wire(self):
+        """ Get the 4-wire measurement state.
+
+        Returns:
+            str: The current state, "cal_invalid", "disabled", "inactive" or "active".
+
+        """
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_get_4wire", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
 
     def get_adc_resistor(self):
         """ Get adc resistor value.
@@ -190,8 +217,22 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
+    def get_src_cur_limit_enabled(self):
+        """ Get current state of voltage source current limiting.
+
+        Returns:
+            bool: True if set to constant current, false if set to cut-off.
+
+        """
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_get_src_cur_limit_enabled", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["enabled"]
+
     def get_supplies(self):
-        """ Get a list of all available supplies. Supply ID 0 allways refers to the power box.
+        """ Get a list of all available supplies. Supply ID 0 always refers to the power box.
 
         Returns:
             list: List of supply objects.
@@ -334,6 +375,19 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["connected"]
 
+    def set_4wire(self, enable):
+        """ Enable/disable 4-wire measurements using Sense+/-.
+
+        Args:
+            enable (bool): True to enable 4-wire, false to disable
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_set_4wire", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def set_adc_resistor(self, value):
         """ Set the value of the shunt resistor for the ADC.
 
@@ -343,6 +397,19 @@ class Arc:
         """
         data = {"device_id": self.id, "value": value}
         request = {"type": "request", "cmd": "arc_set_adc_resistor", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def set_battery_profile(self, value):
+        """ Set the battery profile.
+
+        Args:
+            value (list): The list of battery profile step dicts (max 10). Each dict is of the { "current|resistance|power" : SI value, "duration" : seconds } form.
+
+        """
+        data = {"device_id": self.id, "value": value}
+        request = {"type": "request", "cmd": "arc_set_battery_profile", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
@@ -452,6 +519,19 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
+    def set_src_cur_limit_enabled(self, enable):
+        """ Enable voltage source current limit (CC) operation.
+
+        Args:
+            enable (bool): True means enable constant current, false means cut-off.
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_set_src_cur_limit_enabled", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def set_supply(self, supply_id, series = 1, parallel = 1):
         """ Set power supply type.
 
@@ -518,6 +598,24 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def wait_for_battery_data(self, timeout):
+        """ Wait for battery data.
+
+        Args:
+            timeout (int): Maximum timeout in ms. May time out earlier if another Arc is returning battery data.
+        Returns:
+            dict: Battery data dict or None if timeout. The dict will contain "timestamp" in seconds,
+                           "iteration", "step", "voltage" at the end of the current step and "discharge" in coulombs accumulating
+                           the total discharge of the battery since profiling start.
+
+        """
+        data = {"device_id": self.id, "timeout": timeout}
+        request = {"type": "request", "cmd": "arc_wait_for_battery_data", "data": data}
+        response = self.connection.send_and_receive(request, 60 + (timeout / 1000))
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
 
     def write_tx(self, value):
         """ Write data to TX.
