@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import unicodedata
 from otii_tcp_client import otii_connection, otii_exception
+from dateutil.parser import isoparse
 
 CHUNK_SIZE = 2000
 
@@ -13,6 +14,7 @@ class Recording:
     Attributes:
         id (int): ID of the recording.
         name (string): Name of the recording.
+        start_time (datetime.datetime): Start of the recording or None if unsupported by TCP server.
         connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
 
     """
@@ -25,6 +27,8 @@ class Recording:
         """
         self.id = recording_dict["recording_id"]
         self.name = recording_dict["name"]
+        starttimestring = recording_dict.get("start-time")
+        self.start_time = isoparse(starttimestring) if starttimestring else None
         self.connection = connection
 
     def delete(self):
