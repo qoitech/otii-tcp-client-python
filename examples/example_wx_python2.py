@@ -2,7 +2,7 @@
 import sys, os
 import wx
 
-sys.path.append(os.path.normpath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.normpath(os.path.join(os.path.dirname(__file__), '..')))
 from otii_tcp_client import otii_connection, otii_exception, otii
 
 import example_config as cfg
