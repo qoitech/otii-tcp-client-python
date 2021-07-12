@@ -77,7 +77,7 @@ class Otii:
             return []
         device_objects = []
         for device in response["data"]["devices"]:
-            if device["type"] == "Arc":
+            if device["type"] == "Arc" or device["type"] == "UART":
                 device_object = arc.Arc(device, self.connection)
                 device_objects.append(device_object)
         return device_objects
