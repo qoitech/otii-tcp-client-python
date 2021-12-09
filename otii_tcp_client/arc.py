@@ -629,3 +629,25 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def get_property(self, name):
+        data = {"device_id": self.id, "name": name}
+        request = {"type": "request", "cmd": "arc_get_property", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
+
+    def set_property(self, name, value):
+        data = {"device_id": self.id, "name": name, "value": value}
+        request = {"type": "request", "cmd": "arc_set_property", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def commit(self):
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_commit", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)

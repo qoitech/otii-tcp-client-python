@@ -18,6 +18,8 @@ def get_new_trans_id():
     return str(trans_id)
 
 class OtiiConnection:
+    recv_msg = ""
+
     """ Class to define the server connection handler
 
     Attributes:
@@ -70,52 +72,42 @@ class OtiiConnection:
                     raise
                 time.sleep(0.5)
 
-        self.sock.setblocking(0)
-        self.sock.settimeout(3)
-        json_data = json.loads((self.sock.recv(self.recv_buffer)).decode("utf-8"))
-        # Remove initial connected response from server
-        if json_data["type"] == "information":
-            pass
-        return json_data
+        return self.receive_response(3, "")
 
     def receive_response(self, timeout_seconds, trans_id):
         """ Receive a JSON formated response from the server.
 
         Args:
             timeout_seconds (int): Transmission timeout (s).
-            trans_id (int): ID of transmission.
+            trans_id (str): ID of transmission.
 
         Returns:
             dict: Decoded JSON server response.
 
         """
-        recv_msg = ""
-        json_object = False
-        self.sock.setblocking(0)
+        response = None
         self.sock.settimeout(timeout_seconds)
-        while not json_object:
+        while not response:
             try:
                 recv_data = self.sock.recv(self.recv_buffer)
                 if len(recv_data) == 0:
                     raise DisconnectedException()
             except ConnectionResetError:
                 raise DisconnectedException()
-            recv_msg += recv_data.decode("utf-8")
-            try:
-                json_data = json.loads(recv_msg)
+            self.recv_msg += recv_data.decode("utf-8")
+            items = self.recv_msg.split("\r\n")
+            self.recv_msg = items.pop()
+            for item in items:
+                json_data = json.loads(item)
                 if json_data["type"] == "information":
-                    print("Info: " + json_data["info"])
-                    recv_msg = ""
+                    response = json_data
                 elif json_data["type"] == "progress":
                     print("Progress on " + json_data["cmd"] + " is " + str(json_data["progress_value"]))
-                    recv_msg = ""
                 elif json_data["trans_id"] != trans_id:
-                    recv_msg = ""
+                    raise Exception("Transaction id mismatch")
                 else:
-                    json_object = True
-            except ValueError:
-                continue
-        return json_data
+                    response = json_data
+        return response
 
     def send(self, request):
         """ Send request without waiting for response.
