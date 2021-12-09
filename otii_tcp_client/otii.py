@@ -62,22 +62,26 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["device_id"]
 
-    def get_devices(self):
+    def get_devices(self, timeout = 10):
         """ Get a list of connected devices.
+
+        Args:
+            timeout (int, optional): Timeout in seconds to wait for avaliable devices.
 
         Returns:
             list: List of Arc device objects.
 
         """
-        request = {"type": "request", "cmd": "otii_get_devices"}
-        response = self.connection.send_and_receive(request)
+        data = {"timeout": timeout}
+        request = {"type": "request", "cmd": "otii_get_devices", "data": data}
+        response = self.connection.send_and_receive(request, timeout + 3)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
         elif not response["data"]:
             return []
         device_objects = []
         for device in response["data"]["devices"]:
-            if device["type"] == "Arc":
+            if device["type"] == "Arc" or device["type"] == "Ace" or device["type"] == "Simulator":
                 device_object = arc.Arc(device, self.connection)
                 device_objects.append(device_object)
         return device_objects
