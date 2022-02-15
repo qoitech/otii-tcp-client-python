@@ -161,6 +161,20 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
+    def get_main(self):
+        """ Get the state of the main power.
+
+        Returns:
+            bool: State of the main power.
+
+        """
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_get_main", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
+
     def get_main_voltage(self):
         """ Get main voltage value.
 
@@ -442,7 +456,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def set_main(self, enable):
-        """ Turn on or off main power on a devices.
+        """ Turn on or off main power on a device.
 
         Args:
             enable (bool): True to turn on main power, False to turn off.
