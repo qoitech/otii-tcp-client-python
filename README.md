@@ -3,7 +3,7 @@
 The otii_tcp_client is a Python package for controlling the [Otii Automation Toolbox](https://www.qoitech.com/automation-toolbox/).
 
 New functionality in client v1.0.4 requiring [Otii software v2.8.4 or later](https://www.qoitech.com/download):
-- New optinal `timeout` parameter added to `otii.get_devices`, that specifies the time in seconds to wait for an avaliable device
+- New optional `timeout` parameter added to `otii.get_devices`, that specifies the time in seconds to wait for an avaliable device
 - Improved handling of TCP requests
 - Added `arc.get_main` command
 
