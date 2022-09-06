@@ -141,6 +141,43 @@ class Recording:
                 index += chunk
             return data
 
+    def get_channel_info(self, device_id, channel):
+        """ Get information for a channel in the recording.
+
+        Args:
+            device_id (str): ID of device to get info from.
+            channel (str): Name of the channel to get info from.
+
+        Returns:
+            :obj:data: Info
+
+        """
+        data = {"recording_id": self.id, "device_id": device_id, "channel": channel}
+        request = {"type": "request", "cmd": "recording_get_channel_info", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]
+
+    def get_channel_statistics(self, device_id, channel, from_time, to_time):
+        """ Get statistics for a channel in the recording.
+
+        Args:
+            device_id (str): ID of device to get data from.
+            channel (str): Name of the channel to get data from.
+            start (float): Selection start in seconds.
+            end (float): Selection end in seconds.
+
+        Returns:
+            :obj:data: Statistics
+
+        """
+        data = {"recording_id": self.id, "device_id": device_id, "channel": channel, "from": from_time, "to": to_time}
+        request = {"type": "request", "cmd": "recording_get_channel_statistics", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]
 
     def get_log_offset(self, device_id, channel):
         """ Get the offset of an log
