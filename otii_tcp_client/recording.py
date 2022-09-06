@@ -3,7 +3,7 @@ import unicodedata
 from otii_tcp_client import otii_connection, otii_exception
 from dateutil.parser import isoparse
 
-CHUNK_SIZE = 2000
+CHUNK_SIZE = 40000
 
 def remove_control_characters(s):
     return "".join(ch for ch in s if unicodedata.category(ch)[0] != "C")
