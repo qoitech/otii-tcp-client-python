@@ -650,7 +650,7 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
-        return response["data"]["value"]
+        return response["data"].get("value", None)
 
     def set_property(self, name, value):
         data = {"device_id": self.id, "name": name, "value": value}
