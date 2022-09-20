@@ -62,11 +62,12 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["device_id"]
 
-    def get_devices(self, timeout = 10):
+    def get_devices(self, timeout = 10, devicefilter = None):
         """ Get a list of connected devices.
 
         Args:
             timeout (int, optional): Timeout in seconds to wait for avaliable devices.
+            devicefilter (tuple, optional): Override default device filter
 
         Returns:
             list: List of Arc device objects.
@@ -81,7 +82,8 @@ class Otii:
             return []
         device_objects = []
         for device in response["data"]["devices"]:
-            if device["type"] == "Arc" or device["type"] == "Ace" or device["type"] == "Simulator":
+            filter = ("Arc", "Ace", "Simulator") if devicefilter is None else devicefilter
+            if device["type"] in filter:
                 device_object = arc.Arc(device, self.connection)
                 device_objects.append(device_object)
         return device_objects
