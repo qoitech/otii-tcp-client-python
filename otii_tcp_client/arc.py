@@ -675,6 +675,6 @@ class Arc:
         """
         data = {"device_id": self.id, "filename": filename}
         request = {"type": "request", "cmd": "arc_firmware_upgrade", "data": data}
-        response = self.connection.send_and_receive(request)
+        response = self.connection.send_and_receive(request, 15)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
