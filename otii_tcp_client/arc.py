@@ -650,7 +650,7 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
-        return response["data"]["value"]
+        return response["data"].get("value", None)
 
     def set_property(self, name, value):
         data = {"device_id": self.id, "name": name, "value": value}
@@ -663,5 +663,18 @@ class Arc:
         data = {"device_id": self.id}
         request = {"type": "request", "cmd": "arc_commit", "data": data}
         response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def firmware_upgrade(self, filename = None):
+        """ Initiate device firmware update.
+
+        Args:
+            filename (str, optional): Firmware filename.
+
+        """
+        data = {"device_id": self.id, "filename": filename}
+        request = {"type": "request", "cmd": "arc_firmware_upgrade", "data": data}
+        response = self.connection.send_and_receive(request, 15)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)

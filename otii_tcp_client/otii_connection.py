@@ -38,7 +38,7 @@ class OtiiConnection:
         """
         self.host_address = address
         self.host_port = port
-        self.recv_buffer = 4096
+        self.recv_buffer = 128 * 1024
 
     def close_connection(self):
         """ Close connection to server.
