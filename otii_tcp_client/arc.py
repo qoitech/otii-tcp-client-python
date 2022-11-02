@@ -130,6 +130,23 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
+    def get_channel_samplerate(self, channel):
+        """ Get channel sample rate.
+
+        Args:
+            channel (str): Name of the channel to get the sample rate for.
+
+        Returns:
+            int: Sample rate for channel
+
+        """
+        data = {"device_id": self.id, "channel": channel}
+        request = {"type": "request", "cmd": "arc_get_channel_samplerate", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["value"]
+
     def get_exp_voltage(self):
         """ Get the voltage of the expansion port.
 
@@ -424,6 +441,20 @@ class Arc:
         """
         data = {"device_id": self.id, "value": value}
         request = {"type": "request", "cmd": "arc_set_battery_profile", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def set_channel_samplerate(self, channel, value):
+        """ Set the sample rate of a channel
+
+        Args:
+            channel (str): Name of the channel to set the sample rate for.
+            value (int): The sample rate to set
+
+        """
+        data = {"device_id": self.id, "channel": channel, "value": value}
+        request = {"type": "request", "cmd": "arc_set_channel_samplerate", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)

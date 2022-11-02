@@ -88,6 +88,40 @@ class Otii:
                 device_objects.append(device_object)
         return device_objects
 
+    def get_licenses(self):
+        """ Return a list of all licenses for logged in user
+
+        Returns:
+            list: List of licenses
+
+        """
+        request = {"type": "request", "cmd": "otii_get_licenses"}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["licenses"]
+
+    def login(self, username, password):
+        """ Login user
+
+            Args:
+                username: Name of Otii user
+                password: Password of Otii user
+        """
+        data = {"username": username, "password": password}
+        request = {"type": "request", "cmd": "otii_login", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def logout(self):
+        """ Logout user
+        """
+        request = {"type": "request", "cmd": "otii_logout"}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def open_project(self, filename, force = False, progress = False):
         """ Open an existing project.
 
@@ -109,6 +143,30 @@ class Otii:
         proj = project.Project(response["data"]["project_id"], self.connection)
         proj.filename = response["data"]["filename"]
         return proj
+
+    def reserve_license(self, license_id):
+        """ Reserve license
+
+        Args:
+            license_id (int): The license id to reserve.
+        """
+        data = {"license_id": license_id}
+        request = {"type": "request", "cmd": "otii_reserve_license", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def return_license(self, license_id):
+        """ Return license
+
+        Args:
+            license_id (int): The license id to return.
+        """
+        data = {"license_id": license_id}
+        request = {"type": "request", "cmd": "otii_return_license", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
 
     def set_all_main(self, enable):
         """ Turn on or off the main power on all connected devices.
