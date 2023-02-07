@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Otii 3 Basic Measurement
+Otii 3 Sync with log
 
 If you want the script to login and reserve a license autmatically
 Add a configuration file called credentials.json in the current folder
@@ -24,12 +24,21 @@ HOSTNAME = '127.0.0.1'
 PORT = 1905
 
 CREDENTIALS = './credentials.json'
-MEASUREMENT_DURATION = 5.0
+MEASUREMENT_DURATION = 50.0
+START_OF_CYCLE_MESSAGE = 'Connecting...'
 
-def basic_measurement():
+def sync_with_log():
     '''
-    This example shows you how to configure and
-    start a recording of the main current channel.
+    This example shows you how to use the log output
+    to find the start and end point of a complete
+    cycle of activity and sleep mode of an IoT device.
+
+    This code expects the messaged defined in START_OF_CYCLE_MSG
+    to be written to the log input of the Arc/Ace in the beginning
+    of each cycle.
+
+    By finding two consectuive messages, we can get the statistics
+    between those points.
     '''
     # Connect to the Otii 3 application
     connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
@@ -56,9 +65,13 @@ def basic_measurement():
     device.set_main_voltage(3.7)
     device.set_exp_voltage(3.3)
     device.set_max_current(0.5)
+    device.set_uart_baudrate(115200)
+    device.enable_uart(True)
+    device.enable_exp_port(True)
 
-    # Enable the main current channel
+    # Enable the main current and rx channel
     device.enable_channel('mc', True)
+    device.enable_channel('rx', True)
 
     # Get the active project
     project = otii.get_active_project()
@@ -78,14 +91,27 @@ def basic_measurement():
     # Stop the recording
     project.stop_recording()
 
-    # Get statistics for the recording
+    # Find at least two log messages
     recording = project.get_last_recording()
+    count = recording.get_channel_data_count(device.id, 'rx')
+    data = recording.get_channel_data(device.id, 'rx', 0, count)
+    values = data['values']
+    timestamps = [
+        value['timestamp'] for value in values
+        if value['value'] == START_OF_CYCLE_MESSAGE
+    ]
+    if len(timestamps) < 2:
+        raise Exception(f'Need at least two "{START_OF_CYCLE_MESSAGE}" timestamps')
+    from_time = timestamps[0]
+    to_time = timestamps[1]
+
+    # Get statistics for the time between the two log entries
     info = recording.get_channel_info(device.id, 'mc')
-    statistics = recording.get_channel_statistics(device.id, 'mc', info['from'], info['to'])
+    statistics = recording.get_channel_statistics(device.id, 'mc', from_time, to_time)
 
     # Print the statistics
-    print(f'From:        {info["from"]} s')
-    print(f'To:          {info["to"]} s')
+    print(f'From:        {from_time} s')
+    print(f'To:          {to_time} s')
     print(f'Offset:      {info["offset"]} s')
     print(f'Sample rate: {info["sample_rate"]}')
 
@@ -98,4 +124,4 @@ def basic_measurement():
     connection.close_connection()
 
 if __name__ == '__main__':
-    basic_measurement()
+    sync_with_log()
