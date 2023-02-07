@@ -36,7 +36,7 @@ def basic_measurement():
     connect_response = connection.connect_to_server(try_for_seconds=10)
     if connect_response['type'] == 'error':
         raise Exception(f'Exit! Error code: {connect_response["errorcode"]}, '
-                        'Description: {connect_response["payload"]["message"]}')
+                        f'Description: {connect_response["payload"]["message"]}')
     otii = otii_application.Otii(connection)
 
     # Optional login to the license server and reserve a license
