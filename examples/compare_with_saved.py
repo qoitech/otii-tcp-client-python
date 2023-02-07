@@ -32,7 +32,7 @@ MAX_NO_OF_RECORDINGS = 10
 def compare_with_saved():
     '''
     This example shows you how to compare a new
-    recording with a previous saved one.
+    recording with a previously saved one.
     '''
     # Connect to the Otii 3 application
     connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
@@ -57,7 +57,6 @@ def compare_with_saved():
         project = otii.open_project(PROJECT_FOLDER)
     else:
         project = otii.create_project()
-    time.sleep(1.0) # TODO: Remove this one
 
     # Get a reference to an Arc or Ace device
     devices = otii.get_devices()
@@ -107,7 +106,6 @@ def compare_with_saved():
 
     # Save the project
     project.save_as(PROJECT_FOLDER)
-    time.sleep(1.0) # TODO: Remove this one
 
     # Disconnect from the Otii 3 application
     connection.close_connection()
