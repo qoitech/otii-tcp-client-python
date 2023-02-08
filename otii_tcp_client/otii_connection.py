@@ -18,8 +18,6 @@ def get_new_trans_id():
     return str(trans_id)
 
 class OtiiConnection:
-    recv_msg = ""
-
     """ Class to define the server connection handler
 
     Attributes:
@@ -29,6 +27,8 @@ class OtiiConnection:
         sock (socket): Communication socket.
 
     """
+    recv_msg = ""
+
     def __init__(self, address, port):
         """
         Args:
