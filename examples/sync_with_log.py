@@ -13,7 +13,6 @@ using the following format:
     }
 
 '''
-
 import json
 import os
 import time
