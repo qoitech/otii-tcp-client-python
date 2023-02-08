@@ -104,7 +104,7 @@ class Otii:
                     "hostname":"",
                     "addons":[{
                         "id":"Automation",
-                        "attributes":{}
+                        "attributes":null
                     }]
                 }]
 
