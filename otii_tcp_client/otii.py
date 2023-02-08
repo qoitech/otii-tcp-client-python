@@ -94,6 +94,20 @@ class Otii:
         Returns:
             list: List of licenses
 
+            .. code-block:: json
+
+                [{
+                    "id":1234,
+                    "type":"Pro",
+                    "available":true,
+                    "reserved_to":"",
+                    "hostname":"",
+                    "addons":[{
+                        "id":"Automation",
+                        "attributes":{}
+                    }]
+                }]
+
         """
         request = {"type": "request", "cmd": "otii_get_licenses"}
         response = self.connection.send_and_receive(request)

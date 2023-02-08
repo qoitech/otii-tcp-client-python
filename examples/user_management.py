@@ -54,10 +54,11 @@ def list_and_reserve_licenses():
 
     # List all available licenses
     otii_licenses = otii.get_licenses()
-    print('  Id Type         Reserved to     Hostname')
+    print('  Id Type         Available Reserved to     Hostname')
     for otii_license in otii_licenses:
-        print(f'{otii_license["id"]:4d} {otii_license["type"]:12} '
-              f'{otii_license["reservedTo"]:15} {otii_license["hostname"]}')
+        available = "Yes" if otii_license["available"] else "No "
+        print(f'{otii_license["id"]:4d} {otii_license["type"]:12} {available}       '
+              f'{otii_license["reserved_to"]:15} {otii_license["hostname"]}')
         for addon in otii_license['addons']:
             print(f'     - {addon["id"]}')
 
