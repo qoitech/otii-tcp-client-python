@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #coding: utf-8
 
-from otii_tcp_client import otii_connection, otii_exception
+from otii_tcp_client import otii_connection, otii_exception, battery_emulator
 
 class Arc:
-    """ Class to define an Arc device.
-        Includes operations that can be run on the Arc.
+    """ Class to define an Arc or Ace device.
+        Includes operations that can be run on the Arc or Ace.
 
     Attributes:
         type (str): Device type, "Arc" for Arc devices.
@@ -25,6 +25,22 @@ class Arc:
         self.id = device_dict["device_id"]
         self.name = device_dict["name"]
         self.connection = connection
+
+    def add_to_project(self):
+        """ Add device to current project.
+
+        """
+        data = {
+            "device_id": self.id,
+        }
+        request = {
+            "type": "request",
+            "cmd": "arc_add_to_project",
+            "data": data,
+        }
+        response = self.connection.send_and_receive(request, 10)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
 
     def calibrate(self):
         """ Perform internal calibration of an Arc device.
@@ -262,89 +278,23 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["enabled"]
 
-    def get_supplies(self):
-        """ Get a list of all available supplies. Supply ID 0 always refers to the power box.
+    def get_supply_mode(self):
+        """ Get current supply mode
 
         Returns:
-            list: List of supply objects.
+            string: "power-box" or "battery-emulator"
 
         """
         data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supplies", "data": data}
+        request = {
+            "type": "request",
+            "cmd": "arc_get_supply_mode",
+            "data": data,
+        }
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
-        return response["data"]["supplies"]
-
-    def get_supply(self):
-        """ Get current power supply ID.
-
-        Returns:
-            int: ID of current supply.
-
-        """
-        data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supply", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-        return response["data"]["supply_id"]
-
-    def get_supply_parallel(self):
-        """ Get current number of simulated batteries in parallel.
-
-        Returns:
-            int: Number of batteries in parallel.
-
-        """
-        data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supply_parallel", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-        return response["data"]["value"]
-
-    def get_supply_series(self):
-        """ Get current number of simulated batteries in series.
-
-        Returns:
-            int: Number of batteries in series.
-
-        """
-        data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supply_series", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-        return response["data"]["value"]
-
-    def get_supply_soc_tracking(self):
-        """ Get current state of power supply State of Charge tracking.
-
-        Returns:
-            bool: True if State fo Charge tracking is enabled, False if disabled.
-
-        """
-        data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supply_soc_tracking", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-        return response["data"]["enabled"]
-
-    def get_supply_used_capacity(self):
-        """ Get current power supply used capacity.
-
-        Returns:
-            float: Used capacity in coulomb (C).
-
-        """
-        data = {"device_id": self.id}
-        request = {"type": "request", "cmd": "arc_get_supply_used_capacity", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-        return response["data"]["value"]
+        return response["data"]["supply_mode"]
 
     def get_uart_baudrate(self):
         """ Get the UART baud rate.
@@ -577,43 +527,57 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_supply(self, supply_id, series = 1, parallel = 1):
-        """ Set power supply type.
+    def set_supply_battery_emulator(
+        self,
+        battery_profile_id,
+        *,
+        series = 1,
+        parallel = 1,
+        used_capacity = None,
+        soc = None,
+        soc_tracking = True,
+    ):
+        """ Set power supply to battery emulator.
+
+        It is only possible to set one of **used_capacity** and **soc**. If neither is set,
+        used_capacity is set to 0, and soc to 100.
 
         Args:
-            supply_id (int): ID of supply type, as returned by get_supplies.
+            battery_profile_id (string): Id of battery profile, as returned by otii.get_battery_profiles.
             series (int, optional): Number of batteries in series, defaults to 1.
             parallel (int, optional): Number of batteries in parallel, defaults to 1.
+            used_capacity (int, optional): Used capacity, defaults to 0.
+            soc (int, optional): State of Charge, defaults to 100.
+            soc_tracking (bool, optional): State of Charge tracking, defaults to True.
+
+        Returns:
+            battery_emulator(:obj:BatteryEmulator): Battery emulator
 
         """
-        data = {"device_id": self.id, "supply_id": supply_id, "series": series, "parallel": parallel}
-        request = {"type": "request", "cmd": "arc_set_supply", "data": data}
+        data = {
+            "device_id": self.id,
+            "battery_profile_id": battery_profile_id,
+            "series": series,
+            "parallel": parallel,
+            "used_capacity": used_capacity,
+            "soc": soc,
+            "soc_tracking": soc_tracking,
+        }
+        request = {
+            "type": "request",
+            "cmd": "arc_set_supply_battery_emulator",
+            "data": data,
+        }
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+        return battery_emulator.BatteryEmulator(response["data"]["battery_emulator_id"], self.connection);
 
-    def set_supply_soc_tracking(self, enable):
-        """ Set power supply State of Charge tracking.
-
-        Args:
-            enable (bool): True to enable State of Charge tracking, False to disable.
-
+    def set_supply_power_box(self):
+        """ Set power supply to power box.
         """
-        data = {"device_id": self.id, "enable": enable}
-        request = {"type": "request", "cmd": "arc_set_supply_soc_tracking", "data": data}
-        response = self.connection.send_and_receive(request)
-        if response["type"] == "error":
-            raise otii_exception.Otii_Exception(response)
-
-    def set_supply_used_capacity(self, value):
-        """ Set power supply used capacity.
-
-        Args:
-            value (float): Capacity used in coulombs (C), multiply mAh by 3.6 to get C.
-
-        """
-        data = {"device_id": self.id, "value": value}
-        request = {"type": "request", "cmd": "arc_set_supply_used_capacity", "data": data}
+        data = {"device_id": self.id}
+        request = {"type": "request", "cmd": "arc_set_supply_power_box", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)

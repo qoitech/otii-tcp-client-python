@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 from otii_tcp_client import otii_connection, otii_exception, project, arc
 
+DEFAULT_HOST="127.0.0.1"
+DEFAULT_PORT=1905
+
 class Otii:
     """ Class to define an Otii object.
 
@@ -8,13 +11,34 @@ class Otii:
         connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, connection):
+    def __init__(self, connection=None):
         """
         Args:
             connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
 
         """
         self.connection = connection
+
+    def close(self):
+        self.connection.close_connection()
+
+    def connect(self, *, host=DEFAULT_HOST, port=DEFAULT_PORT, try_for_seconds=10):
+        """ Connect to Otii.
+
+        Args:
+            host (str): Server address.
+            port (int): Connection port number.
+            try_for_seconds (int): Seconds to try to connect.
+
+        Returns:
+            dict: Decoded JSON connection response.
+
+        """
+        self.connection = otii_connection.OtiiConnection(host, port)
+        connect_response = self.connection.connect_to_server(try_for_seconds=try_for_seconds)
+        if connect_response['type'] == 'error':
+            raise otii_exception.Otii_Exception(connect_response)
+        return connect_response
 
     def create_project(self):
         """ Create a new project.
@@ -44,6 +68,32 @@ class Otii:
             return None
         else:
             return project.Project(response["data"]["project_id"], self.connection)
+
+    def get_battery_profile_info(self, battery_profile_id):
+        """ Returns informatiion about a battery profile.
+
+        Args:
+            battery_profile_id (string): Battery profile id.
+        """
+        data = {"battery_profile_id": battery_profile_id}
+        request = {"type": "request", "cmd": "otii_get_battery_profile_info", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]
+
+    def get_battery_profiles(self):
+        """ Returns a list of available battery profiles.
+
+        Returns:
+            list: List of battery profile objects
+
+        """
+        request = {"type": "request", "cmd": "otii_get_battery_profiles"}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["battery_profiles"]
 
     def get_device_id(self, device_name):
         """ Get device id from device name.

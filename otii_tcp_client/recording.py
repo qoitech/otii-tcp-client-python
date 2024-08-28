@@ -165,8 +165,8 @@ class Recording:
         Args:
             device_id (str): ID of device to get data from.
             channel (str): Name of the channel to get data from.
-            start (float): Selection start in seconds.
-            end (float): Selection end in seconds.
+            from_time (float): Selection start in seconds.
+            to_time (float): Selection end in seconds.
 
         Returns:
             :obj:data: Statistics

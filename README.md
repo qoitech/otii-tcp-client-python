@@ -2,6 +2,14 @@
 
 The otii_tcp_client is a Python package for controlling the [Otii Automation Toolbox](https://www.qoitech.com/automation-toolbox/).
 
+Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to Otii 3.
+
+- New functionality in client v1.0.8 requiring [Otii software v3.5.2 or later](https://www.qoitech.com/download):
+
+- Added a new API for battery emulation
+- Added a simpler way to connect to the Otii server using `otii.connect`
+- Added `arc.add_to_project` that explicitly adds the Arc/Ace device to the project
+
 New functionality in client v1.0.7 requiring [Otii software v3.1.0 or later](https://www.qoitech.com/download):
 
 - Added `otii_control.py` script for [user management](https://www.qoitech.com/docs/user-manual/automation-toolbox/user-management)

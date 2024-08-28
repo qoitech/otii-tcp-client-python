@@ -22,6 +22,8 @@ class Otii_Exception(Exception):
             self.message = response
         elif self.type == "Connection denied":
             self.message = response
+        elif self.type == "Could not login":
+            self.message = response
         elif self.type == "Device not connected":
             self.message = response["cmd"] + " Error: \"" + self.type + "\"\tCannot find Arc with ID: \"" + response["data"]["device_id"] + "\""
         elif self.type == "Invalid command":
@@ -30,13 +32,25 @@ class Otii_Exception(Exception):
             self.message = response["cmd"] + " Error: \"" + self.type + "\"\tInvalid key: \"" + response["data"]["key"] + "\"\texpected_type: \"" + response["data"]["expected_type"] + "\"\treceived_type: \"" + response["data"]["received_type"] + "\""
         elif self.type == "Invalid key value":
             self.message = response["cmd"] + " Error: \"" + self.type + "\"\tInvalid value: \"" + response["data"]["key"] + "\"\tvalue: \"" + str(response["data"]["value"]) + "\""
+        elif self.type == "License could not be reserved":
+            self.message = response
+        elif self.type == "License could not be returned":
+            self.message = response
         elif self.type == "Missing key in request":
             if "cmd" in response:
                 self.message = response["cmd"] + " Error: \"" + self.type + "\"\tMissing key: \"" + response["data"]["key"] + "\""
             else:
                 self.message = "Error: \"" + self.type + "\"\tMissing key: \"" + response["data"]["key"] + "\""
+        elif self.type == "No license":
+            self.message = response
+        elif self.type == "Not ready":
+            self.message = response
         elif self.type == "Not able to parse request":
             self.message = response["cmd"] + " Error: \"" + self.type + "\"\tJSON parse error msg: \"" + response["data"]["parse_error"] + "\"\tmessage: \"" + str(response["data"]["data"]) + "\""
+        elif self.type == "Operation not supported":
+            self.message = response
+        elif self.type == "Project does not exist":
+            self.message = response
         elif self.type == "Request too large":
             self.message = response["cmd"] + " Error: \"" + self.type + "\"\tBytes received when aborted: \"" + response["data"]["read_size"] + "\"\tmax allowed bytes: \"" + str(response["data"]["max_size"]) + "\""
         # Temporary to handle unexpected messages when waiting for replay, to be updated when client is updated to handle asynchronous communication
