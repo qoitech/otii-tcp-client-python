@@ -2,6 +2,8 @@
 
 The otii_tcp_client is a Python package for controlling the [Otii Automation Toolbox](https://www.qoitech.com/automation-toolbox/).
 
+Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to Otii 3.
+
 New functionality in client v1.0.7 requiring [Otii software v3.1.0 or later](https://www.qoitech.com/download):
 
 - Added `otii_control.py` script for [user management](https://www.qoitech.com/docs/user-manual/automation-toolbox/user-management)
