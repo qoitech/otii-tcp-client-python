@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Otii 3 Power sweep
+Otii 3 Voltage sweep
 
 If you want the script to login and reserve a license autmatically
 Add a configuration file called credentials.json in the current folder
@@ -54,7 +54,7 @@ GPI1_EDGE = 'any' # 'falling', 'raising' or 'any'
 GPI1_POLLING_TIME = 0.2
 GPI1_TIMEOUT = 60
 
-def power_sweep():
+def voltage_sweep():
     '''
     This example shows how an automatic voltage sweep can be done, triggering on
     an UART message, a falling edge in current measurement or a GPI change.
@@ -239,4 +239,4 @@ def wait_for_gpi(recording, device):
             return None
 
 if __name__ == '__main__':
-    power_sweep()
+    voltage_sweep()
