@@ -2,27 +2,19 @@
 '''
 Otii 3 Voltage sweep
 
-If you want the script to login and reserve a license autmatically
-Add a configuration file called credentials.json in the current folder
+If you want the script to login and reserve a license automatically
+add a configuration file called credentials.json in the current folder
 using the following format:
 
     {
         "username": "YOUR USERNAME",
-        "password": "YOUR PASSWORD",
-        "license_id": "YOUR LICENSE ID"
+        "password": "YOUR PASSWORD"
     }
 
 '''
-import json
-import os
 import time
 from datetime import datetime
-from otii_tcp_client import otii_connection, otii as otii_application
-
-# The default hostname and port of the Otii 3 application
-HOSTNAME = '127.0.0.1'
-PORT = 1905
-CREDENTIALS = './credentials.json'
+from otii_tcp_client import otii_client
 
 # Sweep settings
 START_VOLTAGE = 4.2
@@ -54,30 +46,20 @@ GPI1_EDGE = 'any' # 'falling', 'raising' or 'any'
 GPI1_POLLING_TIME = 0.2
 GPI1_TIMEOUT = 60
 
-def voltage_sweep():
+class AppException(Exception):
+    '''Application Exception'''
+
+def voltage_sweep(otii):
     '''
     This example shows how an automatic voltage sweep can be done, triggering on
     an UART message, a falling edge in current measurement or a GPI change.
     '''
-    # Connect to the Otii 3 application
-    connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
-    connect_response = connection.connect_to_server(try_for_seconds=10)
-    if connect_response['type'] == 'error':
-        raise Exception(f'Exit! Error code: {connect_response["errorcode"]}, '
-                        f'Description: {connect_response["payload"]["message"]}')
-    otii = otii_application.Otii(connection)
-
-    # Optional login to the license server and reserve a license
-    if os.path.isfile(CREDENTIALS):
-        with open(CREDENTIALS, encoding='utf-8') as file:
-            credentials = json.load(file)
-            otii.login(credentials['username'], credentials['password'])
-            otii.reserve_license(credentials['license_id'])
-
     # Get a reference to a Arc or Ace device
     devices = otii.get_devices()
     if len(devices) != 1:
-        raise Exception(f'Exactly 1 device expected to be connected, found {len(devices)} devices')
+        raise AppException(
+            f'Exactly 1 device expected to be connected, found {len(devices)} devices'
+        )
     device = devices[0]
 
     # Set up and enable channels
@@ -131,9 +113,6 @@ def voltage_sweep():
 
     print('Done!')
 
-    # Disconnect from the Otii 3 application
-    connection.close_connection()
-
 def wait_for_condition(condition_type, recording, device):
     ''' Wait for a condition '''
     if condition_type == 'message':
@@ -145,7 +124,7 @@ def wait_for_condition(condition_type, recording, device):
     if condition_type == 'gpio':
         return wait_for_gpi(recording, device)
 
-    raise Exception(f'Unknown condition type {condition_type}')
+    raise AppException(f'Unknown condition type {condition_type}')
 
 def wait_for_message(recording, device):
     ''' Wait for message on UART '''
@@ -216,7 +195,11 @@ def wait_for_gpi(recording, device):
         count = recording.get_channel_data_count(device.id, 'gpi1')
 
         if count - last_count > 0:
-            gpi1_data = recording.get_channel_data(device.id, 'gpi1', last_count, count - last_count)
+            gpi1_data = recording.get_channel_data(device.id,
+                                                   'gpi1',
+                                                   last_count,
+                                                   count - last_count
+                                                   )
             last_count = count
 
             for data in gpi1_data['values']:
@@ -230,7 +213,7 @@ def wait_for_gpi(recording, device):
                     if data['value'] != last_value:
                         return data['timestamp']
                 else:
-                    raise Exception(f'Unknown GPI edge type {GPI1_EDGE}')
+                    raise AppException(f'Unknown GPI edge type {GPI1_EDGE}')
 
                 last_value = data['value']
 
@@ -238,5 +221,11 @@ def wait_for_gpi(recording, device):
             print('Maximum time reached, not found falling edge')
             return None
 
+def main():
+    '''Connect to the Otii 3 application and run the measurement'''
+    client = otii_client.OtiiClient()
+    with client.connect() as otii:
+        voltage_sweep(otii)
+
 if __name__ == '__main__':
-    voltage_sweep()
+    main()

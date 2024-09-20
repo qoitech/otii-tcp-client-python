@@ -3,6 +3,7 @@
 Otii 3 Start otii_server
 '''
 import subprocess
+from otii_tcp_client import otii_client
 from basic_measurement import basic_measurement
 
 # Remember to add the directory of the otii_server to the path.
@@ -22,7 +23,10 @@ def start_otii_server():
         print_output()
 
         try:
-            basic_measurement()
+            client = otii_client.OtiiClient()
+            with client.connect() as otii:
+                basic_measurement(otii)
+        # pylint: disable=broad-exception-caught
         except Exception as error:
             print(f'Error: {error}')
 

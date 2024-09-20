@@ -15,11 +15,7 @@ credentials.json in the current folder using the following format:
 import json
 import os
 import time
-from otii_tcp_client import otii_connection, otii as otii_application
-
-# The default hostname and port of the Otii 3 application
-HOSTNAME = '127.0.0.1'
-PORT = 1905
+from otii_tcp_client import otii_client
 
 CREDENTIALS = './credentials.json'
 ABBREVATIONS = {
@@ -28,22 +24,17 @@ ABBREVATIONS = {
     "BatteryValidation": "BVT",
 }
 
-def list_and_reserve_licenses():
+class AppException(Exception):
+    '''Application Exception'''
+
+def list_and_reserve_licenses(otii):
     '''
     This example shows you how to login,
     list licenses, reserve and return a license,
     and how to logout.
     '''
     if not os.path.isfile(CREDENTIALS):
-        raise Exception('You need to create a credentials.json file')
-
-    # Connect to the Otii 3 application
-    connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
-    connect_response = connection.connect_to_server(try_for_seconds=10)
-    if connect_response['type'] == 'error':
-        raise Exception(f'Exit! Error code: {connect_response["errorcode"]}, '
-                        f'Description: {connect_response["payload"]["message"]}')
-    otii = otii_application.Otii(connection)
+        raise AppException('You need to create a credentials.json file')
 
     # Read the credentials
     with open(CREDENTIALS, encoding='utf-8') as file:
@@ -72,5 +63,11 @@ def list_and_reserve_licenses():
     otii.return_license(credentials['license_id'])
     otii.logout()
 
+def main():
+    '''Connect to the Otii 3 application and run the measurement'''
+    client = otii_client.OtiiClient()
+    with client.connect(licensing = otii_client.LicensingMode.MANUAL) as otii:
+        list_and_reserve_licenses(otii)
+
 if __name__ == '__main__':
-    list_and_reserve_licenses()
+    main()

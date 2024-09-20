@@ -5,42 +5,31 @@ Otii 3 Battery Emulator
 To control the battery emulation from a script you need an Battery Toolbox
 license in addition to the Automation Toolbox license
 
-If you want the script to login and reserve a license autmatically
-Add a configuration file called credentials.json in the current folder
+If you want the script to login and reserve a license automatically
+add a configuration file called credentials.json in the current folder
 using the following format:
 
     {
         "username": "YOUR USERNAME",
-        "password": "YOUR PASSWORD",
-        "license_ids": ["YOUR AUTOMATION LICENSE", "YOUR BATTERY LICENSE"]
+        "password": "YOUR PASSWORD"
     }
 
 '''
-import json
-import os
 import time
-from otii_tcp_client import otii as otii_client
+from otii_tcp_client import otii_client
 
 CREDENTIALS = '~/credentials.json'
 MODEL = 'LM17500'
 
-def run_emulator():
-    # Connect to the Otii 3 application
-    otii = otii_client.Otii()
-    otii.connect()
+class AppException(Exception):
+    '''Application Exception'''
 
-    # Optional login to the license server and reserve a license
-    if os.path.isfile(CREDENTIALS):
-        with open(CREDENTIALS, encoding='utf-8') as file:
-            credentials = json.load(file)
-            otii.login(credentials['username'], credentials['password'])
-            for license in credentials['license_ids']:
-                otii.reserve_license(license)
-
+def run_emulator(otii):
+    '''Test the emulator api'''
     # Get a reference to a Arc or Ace device and add it to the project
     devices = otii.get_devices()
     if len(devices) == 0:
-        raise Exception('No Arc or Ace connected!')
+        raise AppException('No Arc or Ace connected!')
     device = devices[0]
     device.add_to_project()
 
@@ -60,7 +49,7 @@ def run_emulator():
         if 'model' in profile and profile['model'] == MODEL
     ]
     if len(lm_profiles) == 0:
-        raise Exception(f'Cannot find a battery profile for {MODEL}')
+        raise AppException(f'Cannot find a battery profile for {MODEL}')
     profile = lm_profiles[0]
     battery_profile_id = profile['battery_profile_id']
 
@@ -96,8 +85,11 @@ def run_emulator():
     # Restore power box mode
     # device.set_supply_power_box()
 
-    # Disconnect from the Otii 3 application
-    otii.close()
+def main():
+    '''Connect to the Otii 3 application and run the measurement'''
+    client = otii_client.OtiiClient()
+    with client.connect(licenses = [ 'Automation', 'Battery' ]) as otii:
+        run_emulator(otii)
 
 if __name__ == '__main__':
-    run_emulator()
+    main()

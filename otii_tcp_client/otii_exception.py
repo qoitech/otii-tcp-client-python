@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 class Otii_Exception(Exception):
     """ Class to define an Otii Exception object
 

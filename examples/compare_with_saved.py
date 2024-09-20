@@ -2,52 +2,33 @@
 '''
 Otii 3 Compared with saved
 
-If you want the script to login and reserve a license autmatically
-Add a configuration file called credentials.json in the current folder
+If you want the script to login and reserve a license automatically
+add a configuration file called credentials.json in the current folder
 using the following format:
 
     {
         "username": "YOUR USERNAME",
-        "password": "YOUR PASSWORD",
-        "license_id": "YOUR LICENSE ID"
+        "password": "YOUR PASSWORD"
     }
 
 '''
-import json
 import os
 import time
-from otii_tcp_client import otii_connection, otii as otii_application
+from otii_tcp_client import otii_client
 
-# The default hostname and port of the Otii 3 application
-HOSTNAME = '127.0.0.1'
-PORT = 1905
-
-CREDENTIALS = './credentials.json'
 MEASUREMENT_DURATION = 5.0
 PROJECTS_FOLDER = os.path.join(os.getcwd(), 'projects')
 PROJECT_FOLDER = os.path.join(os.getcwd(), PROJECTS_FOLDER, 'compare_with_saved')
 MAX_NO_OF_RECORDINGS = 10
 
-def compare_with_saved():
+class AppException(Exception):
+    '''Application Exception'''
+
+def compare_with_saved(otii):
     '''
     This example shows you how to compare a new
     recording with a previously saved one.
     '''
-    # Connect to the Otii 3 application
-    connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
-    connect_response = connection.connect_to_server(try_for_seconds=10)
-    if connect_response['type'] == 'error':
-        raise Exception(f'Exit! Error code: {connect_response["errorcode"]}, '
-                        f'Description: {connect_response["payload"]["message"]}')
-    otii = otii_application.Otii(connection)
-
-    # Optional login to the license server and reserve a license
-    if os.path.isfile(CREDENTIALS):
-        with open(CREDENTIALS, encoding='utf-8') as file:
-            credentials = json.load(file)
-            otii.login(credentials['username'], credentials['password'])
-            otii.reserve_license(credentials['license_id'])
-
     # Try to open a previously saved project
     if not os.path.isdir(PROJECTS_FOLDER):
         os.mkdir(PROJECTS_FOLDER)
@@ -60,7 +41,7 @@ def compare_with_saved():
     # Get a reference to an Arc or Ace device
     devices = otii.get_devices()
     if len(devices) == 0:
-        raise Exception('No Arc or Ace connected!')
+        raise AppException('No Arc or Ace connected!')
     device = devices[0]
 
     # Configure the device
@@ -106,9 +87,6 @@ def compare_with_saved():
     # Save the project
     project.save_as(PROJECT_FOLDER)
 
-    # Disconnect from the Otii 3 application
-    connection.close_connection()
-
 def print_header():
     ''' Prints the header for the statistics '''
     print('Recording             From (s)     To (s) Offset (s)  Sample rate    '
@@ -121,5 +99,11 @@ def print_statistics(recording, info, statistics):
     print(f'{statistics["min"]:10.5f} {statistics["max"]:10.5f}   {statistics["average"]:10.5f}   '
           f'{statistics["energy"] / 3600:12.6}')
 
+def main():
+    '''Connect to the Otii 3 application and run the measurement'''
+    client = otii_client.OtiiClient()
+    with client.connect() as otii:
+        compare_with_saved(otii)
+
 if __name__ == '__main__':
-    compare_with_saved()
+    main()

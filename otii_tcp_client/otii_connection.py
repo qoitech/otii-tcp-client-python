@@ -1,18 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# pylint: disable=missing-module-docstring
 import datetime
 import json
 import socket
-import sys
 import time
 
-from otii_tcp_client import otii_exception
-
 class DisconnectedException(Exception):
+    # pylint: disable=missing-class-docstring
     pass
 
 trans_id = 0
 
 def get_new_trans_id():
+    # pylint: disable=missing-function-docstring
     global trans_id
     trans_id += 1
     return str(trans_id)
@@ -64,7 +64,7 @@ class OtiiConnection:
                     socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect((self.host_address, self.host_port))
                 connected = True
-            except socket.error as e:
+            except socket.error:
                 elapsed_time = datetime.datetime.now().timestamp() - start_time
                 if elapsed_time > try_for_seconds:
                     self.sock.close()
@@ -102,7 +102,7 @@ class OtiiConnection:
                 if json_data["type"] == "information":
                     response = json_data
                 elif json_data["type"] == "progress":
-                    print("Progress on " + json_data["cmd"] + " is " + str(json_data["progress_value"]))
+                    pass
                 elif json_data["trans_id"] != trans_id:
                     raise Exception("Transaction id mismatch")
                 else:

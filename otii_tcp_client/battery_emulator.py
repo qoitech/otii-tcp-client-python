@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pylint: disable=missing-module-docstring
 from otii_tcp_client import otii_exception
 
 class BatteryEmulator:

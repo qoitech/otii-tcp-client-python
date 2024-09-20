@@ -2,53 +2,33 @@
 '''
 Otii 3 Basic Measurement
 
-If you want the script to login and reserve a license autmatically
-Add a configuration file called credentials.json in the current folder
+If you want the script to login and reserve a license automatically
+add a configuration file called credentials.json in the current folder
 using the following format:
 
     {
         "username": "YOUR USERNAME",
-        "password": "YOUR PASSWORD",
-        "license_id": "YOUR LICENSE ID"
+        "password": "YOUR PASSWORD"
     }
 
 '''
-import json
-import os
 import time
-from otii_tcp_client import otii_connection, otii as otii_application
+from otii_tcp_client import otii_client
 
-# The default hostname and port of the Otii 3 application
-HOSTNAME = '127.0.0.1'
-PORT = 1905
-
-CREDENTIALS = './credentials.json'
 MEASUREMENT_DURATION = 5.0
 
-def basic_measurement():
+class AppException(Exception):
+    '''Application Exception'''
+
+def basic_measurement(otii):
     '''
     This example shows you how to configure and
     start a recording of the main current channel.
     '''
-    # Connect to the Otii 3 application
-    connection = otii_connection.OtiiConnection(HOSTNAME, PORT)
-    connect_response = connection.connect_to_server(try_for_seconds=10)
-    if connect_response['type'] == 'error':
-        raise Exception(f'Exit! Error code: {connect_response["errorcode"]}, '
-                        f'Description: {connect_response["payload"]["message"]}')
-    otii = otii_application.Otii(connection)
-
-    # Optional login to the license server and reserve a license
-    if os.path.isfile(CREDENTIALS):
-        with open(CREDENTIALS, encoding='utf-8') as file:
-            credentials = json.load(file)
-            otii.login(credentials['username'], credentials['password'])
-            otii.reserve_license(credentials['license_id'])
-
     # Get a reference to a Arc or Ace device
     devices = otii.get_devices()
     if len(devices) == 0:
-        raise Exception('No Arc or Ace connected!')
+        raise AppException('No Arc or Ace connected!')
     device = devices[0]
 
     # Configure the device
@@ -93,8 +73,11 @@ def basic_measurement():
     print(f'Average:     {statistics["average"]:.5} A')
     print(f'Energy:      {statistics["energy"] / 3600:.5} Wh')
 
-    # Disconnect from the Otii 3 application
-    connection.close_connection()
+def main():
+    '''Connect to the Otii 3 application and run the measurement'''
+    client = otii_client.OtiiClient()
+    with client.connect() as otii:
+        basic_measurement(otii)
 
 if __name__ == '__main__':
-    basic_measurement()
+    main()

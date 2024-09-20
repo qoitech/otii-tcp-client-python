@@ -15,7 +15,7 @@ setup(
     author_email="support@qoitech.com",
     long_description=long_description,
     url="https://www.qoitech.com/",
-    keywords=["qoitech", "otii", "arc", "tcp"],
+    keywords=["qoitech", "otii", "arc", "ace", "tcp"],
     install_requires=["python-dateutil>=2.7.0"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

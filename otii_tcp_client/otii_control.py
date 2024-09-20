@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-from otii_tcp_client import otii_connection, otii as otii_application, otii_exception
+import sys
+from otii_tcp_client import otii_connection, otii as otii_application
 
 def login(otii, username, password):
     otii.login(username, password)
@@ -9,7 +10,7 @@ def logout(otii):
     otii.logout()
 
 def list_licenses(otii):
-    licenses = otii.get_licenses();
+    licenses = otii.get_licenses()
     print(f'{"  Id"} {"Type":12} {"Reserved to":15} Hostname')
     for license in licenses:
         print(f'{license["id"]:4d} {license["type"]:12} {license["reservedTo"]:15} {license["hostname"]}')

@@ -11,17 +11,13 @@ using the following format:
 
     {
         "username": "YOUR USERNAME",
-        "password": "YOUR PASSWORD",
-        "license_ids": ["YOUR AUTOMATION LICENSE", "YOUR BATTERY LICENSE"]
+        "password": "YOUR PASSWORD"
     }
 
 '''
-import json
-import os
 import unittest
-from otii_tcp_client import otii as otii_client, otii_exception
+from otii_tcp_client import otii_client, otii_exception
 
-CREDENTIALS = '~/credentials.json'
 MODEL = 'LM17500'
 MODEL2 = 'CR2450'
 
@@ -29,16 +25,8 @@ class TestBatteryEmulator(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Connect to the Otii 3 application
-        cls.otii = otii_client.Otii()
-        cls.otii.connect()
-
-        # Optional login to the license server and reserve a license
-        if os.path.isfile(CREDENTIALS):
-            with open(CREDENTIALS, encoding='utf-8') as file:
-                credentials = json.load(file)
-                cls.otii.login(credentials['username'], credentials['password'])
-                for license in credentials['license_ids']:
-                    cls.otii.reserve_license(license)
+        client = otii_client.OtiiClient()
+        cls.otii = client.connect(licenses = [ 'Automation', 'Battery' ])
 
         # Get a reference to a Arc or Ace device
         cls.devices = cls.otii.get_devices()
@@ -58,7 +46,7 @@ class TestBatteryEmulator(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         # Disconnect from the Otii 3 application
-        cls.otii.close()
+        cls.otii.disconnect()
 
     def test_set_supply_to_battery_emulator_used_capacity(self):
         device = TestBatteryEmulator.device

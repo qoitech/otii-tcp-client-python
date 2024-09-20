@@ -1,8 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# pylint: disable=missing-module-docstring
 from otii_tcp_client import otii_connection, otii_exception, project, arc
-
-DEFAULT_HOST="127.0.0.1"
-DEFAULT_PORT=1905
 
 class Otii:
     """ Class to define an Otii object.
@@ -18,27 +16,6 @@ class Otii:
 
         """
         self.connection = connection
-
-    def close(self):
-        self.connection.close_connection()
-
-    def connect(self, *, host=DEFAULT_HOST, port=DEFAULT_PORT, try_for_seconds=10):
-        """ Connect to Otii.
-
-        Args:
-            host (str): Server address.
-            port (int): Connection port number.
-            try_for_seconds (int): Seconds to try to connect.
-
-        Returns:
-            dict: Decoded JSON connection response.
-
-        """
-        self.connection = otii_connection.OtiiConnection(host, port)
-        connect_response = self.connection.connect_to_server(try_for_seconds=try_for_seconds)
-        if connect_response['type'] == 'error':
-            raise otii_exception.Otii_Exception(connect_response)
-        return connect_response
 
     def create_project(self):
         """ Create a new project.
@@ -66,8 +43,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         if response["data"]["project_id"] == -1:
             return None
-        else:
-            return project.Project(response["data"]["project_id"], self.connection)
+        return project.Project(response["data"]["project_id"], self.connection)
 
     def get_battery_profile_info(self, battery_profile_id):
         """ Returns informatiion about a battery profile.
@@ -128,12 +104,12 @@ class Otii:
         response = self.connection.send_and_receive(request, timeout + 3)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
-        elif not response["data"]:
+        if not response["data"]:
             return []
         device_objects = []
         for device in response["data"]["devices"]:
-            filter = ("Arc", "Ace", "Simulator") if devicefilter is None else devicefilter
-            if device["type"] in filter:
+            devfilter = ("Arc", "Ace", "Simulator") if devicefilter is None else devicefilter
+            if device["type"] in devfilter:
                 device_object = arc.Arc(device, self.connection)
                 device_objects.append(device_object)
         return device_objects
@@ -192,7 +168,8 @@ class Otii:
         Args:
             filename (str): Name of project file.
             force (bool, optional): True to open even if unsaved data exists, False not to.
-            progress (bool, optional): True to receive notifications about progress of opening file, False not to.
+            progress (bool, optional): True to receive notifications about progress of opening file,
+            False not to.
 
         Returns:
             int: ID of opened project.
@@ -200,7 +177,8 @@ class Otii:
         """
         data = {"filename": filename, "force": force, "progress": progress}
         request = {"type": "request", "cmd": "otii_open_project", "data": data}
-        # Set timeout to None (blocking) as command can operate over large quantities of data to avoid timeout
+        # Set timeout to None (blocking) as command can operate
+        # over large quantities of data to avoid timeout
         response = self.connection.send_and_receive(request, None)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)

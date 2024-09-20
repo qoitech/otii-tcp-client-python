@@ -1,7 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding: utf-8
+# pylint: disable=missing-module-docstring
 
-from otii_tcp_client import otii_connection, otii_exception, battery_emulator
+from otii_tcp_client import otii_exception, battery_emulator
 
 class Arc:
     """ Class to define an Arc or Ace device.
@@ -386,7 +387,8 @@ class Arc:
         """ Set the battery profile.
 
         Args:
-            value (list): The list of battery profile step dicts (max 10). Each dict is of the { "current|resistance|power" : SI value, "duration" : seconds } form.
+            value (list): The list of battery profile step dicts (max 10).
+            Each dict is of the { "current|resistance|power" : SI value, "duration" : seconds } form.
 
         """
         data = {"device_id": self.id, "value": value}
@@ -571,7 +573,7 @@ class Arc:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
-        return battery_emulator.BatteryEmulator(response["data"]["battery_emulator_id"], self.connection);
+        return battery_emulator.BatteryEmulator(response["data"]["battery_emulator_id"], self.connection)
 
     def set_supply_power_box(self):
         """ Set power supply to power box.
@@ -640,6 +642,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def get_property(self, name):
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "name": name}
         request = {"type": "request", "cmd": "arc_get_property", "data": data}
         response = self.connection.send_and_receive(request)
@@ -648,6 +651,7 @@ class Arc:
         return response["data"].get("value", None)
 
     def set_property(self, name, value):
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "name": name, "value": value}
         request = {"type": "request", "cmd": "arc_set_property", "data": data}
         response = self.connection.send_and_receive(request)
@@ -655,6 +659,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def commit(self):
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id}
         request = {"type": "request", "cmd": "arc_commit", "data": data}
         response = self.connection.send_and_receive(request)

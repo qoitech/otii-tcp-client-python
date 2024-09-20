@@ -1,4 +1,5 @@
 .DS_Store
+credentials.json
 build/
 dist/
 *.egg-info/

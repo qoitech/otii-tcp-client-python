@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-from otii_tcp_client import otii_connection, otii_exception, recording
+#!/usr/bin/env python3
+# pylint: disable=missing-module-docstring
+from otii_tcp_client import otii_exception, recording
 
 class Project:
     """ Class to define an Otii Project object.
@@ -64,8 +65,8 @@ class Project:
             raise otii_exception.Otii_Exception(response)
         if response["data"]["recording_id"] == -1:
             return None
-        else:
-            return recording.Recording(response["data"], self.connection)
+
+        return recording.Recording(response["data"], self.connection)
 
     def get_recordings(self):
         """ List captured recordings.

@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# pylint: disable=missing-module-docstring
 import unicodedata
-from otii_tcp_client import otii_connection, otii_exception
 from dateutil.parser import isoparse
+from otii_tcp_client import otii_exception
 
 CHUNK_SIZE = 40000
 
 def remove_control_characters(s):
+    # pylint: disable=missing-function-docstring
     return "".join(ch for ch in s if unicodedata.category(ch)[0] != "C")
 
 class Recording:
@@ -109,7 +111,7 @@ class Recording:
             :obj:data:
 
         """
-        if channel == "rx" or channel == "i1" or channel == "i2":
+        if channel in [ "rx", "i1", "i2" ]:
             request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel, "index": index, "count":count}
             request = {"type": "request", "cmd": "recording_get_channel_data", "data": request_data}
             response = self.connection.send_and_receive(request, None)
@@ -122,24 +124,24 @@ class Recording:
                     for value in data["values"]
                 ]
             return data
-        else:
-            request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel}
-            request = {"type": "request", "cmd": "recording_get_channel_data", "data": request_data}
-            data = None
-            while count > 0:
-                chunk = min(count, CHUNK_SIZE)
-                request["data"]["index"] = index
-                request["data"]["count"] = chunk
-                response = self.connection.send_and_receive(request, None)
-                if response["type"] == "error":
-                    raise otii_exception.Otii_Exception(response)
-                if data == None:
-                    data = response["data"]
-                else:
-                    data["values"].extend(response["data"]["values"])
-                count -= chunk
-                index += chunk
-            return data
+
+        request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel}
+        request = {"type": "request", "cmd": "recording_get_channel_data", "data": request_data}
+        data = None
+        while count > 0:
+            chunk = min(count, CHUNK_SIZE)
+            request["data"]["index"] = index
+            request["data"]["count"] = chunk
+            response = self.connection.send_and_receive(request, None)
+            if response["type"] == "error":
+                raise otii_exception.Otii_Exception(response)
+            if data is None:
+                data = response["data"]
+            else:
+                data["values"].extend(response["data"]["values"])
+            count -= chunk
+            index += chunk
+        return data
 
     def get_channel_info(self, device_id, channel):
         """ Get information for a channel in the recording.
@@ -191,7 +193,7 @@ class Recording:
 
         """
         data = {"recording_id": self.id, "channel": channel}
-        if (device_id != None):
+        if device_id is not None:
             data["device_id"] = device_id
         request = {"type": "request", "cmd": "recording_get_log_offset", "data": data}
         response = self.connection.send_and_receive(request)
@@ -287,7 +289,7 @@ class Recording:
 
         """
         data = {"recording_id": self.id, "channel": channel, "offset": offset}
-        if (device_id != None):
+        if device_id is not None:
             data["device_id"] = device_id
         request = {"type": "request", "cmd": "recording_set_log_offset", "data": data}
         response = self.connection.send_and_receive(request)
