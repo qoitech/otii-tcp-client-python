@@ -5,6 +5,9 @@ Otii 3 Battery emulator voltage sweep
 To control the battery emulation from a script you need an Battery Toolbox
 license in addition to the Automation Toolbox license
 
+The battery profiles used in this script can be found at
+    https://github.com/qoitech/otii-battery-profiles/tree/master/battery-profiles.
+
 If you want the script to login and reserve a license automatically
 add a configuration file called credentials.json in the current folder
 using the following format:
@@ -13,6 +16,8 @@ using the following format:
         "username": "YOUR USERNAME",
         "password": "YOUR PASSWORD"
     }
+
+Alternatively you can set the environment variables OTII_USERNAME and OTII_PASSWORD.
 
 '''
 import time

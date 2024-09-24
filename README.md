@@ -7,9 +7,10 @@ Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to O
 New functionality in client v1.0.9:
 
 - Added `otii_client`, that makes it easier to connect to to the Otii server, and to login and reserve licenses.
-  Note, this replaces `otii.connect` that was introducewd in v1.0.8.
+  All the examples have been updated to use `otii_client`.
+  Note, this replaces `otii.connect` that was introduced in v1.0.8.
 
-- New functionality in client v1.0.8 requiring [Otii software v3.5.2 or later](https://www.qoitech.com/download):
+New functionality in client v1.0.8 requiring [Otii software v3.5.2 or later](https://www.qoitech.com/download):
 
 - Added a new API for battery emulation
 - Added a simpler way to connect to the Otii server using `otii.connect`
