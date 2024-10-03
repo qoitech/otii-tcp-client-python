@@ -4,6 +4,10 @@ The otii_tcp_client is a Python package for controlling the [Otii Automation Too
 
 Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to Otii 3.
 
+New functionality in client v1.0.10:
+
+- Fixed a problem with not recognising some license types.
+
 New functionality in client v1.0.9:
 
 - Added `otii_client`, that makes it easier to connect to to the Otii server, and to login and reserve licenses.

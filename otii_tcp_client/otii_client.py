@@ -21,8 +21,14 @@ OTII_USERNAME = 'OTII_USERNAME'
 OTII_PASSWORD = 'OTII_PASSWORD'
 
 LICENSE_MAP = {
-    'Automation': [ 'Admin', 'All', 'Automation', 'Enterprise' ],
-    'Battery':    [ 'Admin', 'All', 'Battery', 'Enterprise' ],
+    'Admin':      [ 'Automation', 'Battery' ],
+    'All':        [ 'Automation', 'Battery' ],
+    'Automation': [ 'Automation' ],
+    'Battery':    [ 'Battery' ],
+    'Enterprise': [ 'Automation', 'Battery' ],
+    'Log':        [],
+    'Pro':        [],
+    'Standard':   [],
 }
 
 class Connect(otii.Otii):
@@ -83,6 +89,7 @@ class Connect(otii.Otii):
                 for license in all_licenses
                 if license['reserved_to'] != ''
                     and license['available']
+                    and license['type'] in LICENSE_MAP
                     and wanted_license in LICENSE_MAP[license['type']]
             ]
             available = [
@@ -90,6 +97,7 @@ class Connect(otii.Otii):
                 for license in all_licenses
                 if license['reserved_to'] == ''
                     and license['available']
+                    and license['type'] in LICENSE_MAP
                     and wanted_license in LICENSE_MAP[license['type']]
             ]
             if len(reserved_by_me) == 0:
