@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "otii_tcp_client"
+version = "1.0.10"
+authors = [
+  { name="Qoitech AB", email="support@qoitech.com" },
+]
+description = "Qoitech Otii tcp client library"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Build Tools",
+    "Development Status :: 5 - Production/Stable",
+]
+
+[project.urls]
+Homepage = "https://github.com/qoitech/otii-tcp-client-python"
