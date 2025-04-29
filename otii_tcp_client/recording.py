@@ -17,6 +17,7 @@ class Recording:
         id (int): ID of the recording.
         name (string): Name of the recording.
         start_time (datetime.datetime): Start of the recording or None if unsupported by TCP server.
+        measurements (dict): Measurements included in this recording
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
@@ -31,6 +32,7 @@ class Recording:
         self.name = recording_dict["name"]
         starttimestring = recording_dict.get("start-time")
         self.start_time = isoparse(starttimestring) if starttimestring else None
+        self.measurements = recording_dict.get("measurements")
         self.connection = connection
 
     def delete(self):
