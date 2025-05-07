@@ -369,3 +369,86 @@ class Recording:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+
+    def append_user_log(self, user_log_id, time, message):
+        """ Append a timestamped message to user log
+
+        Args:
+            user_log_id (str): Id of the user log
+            time (float): Timestamp in seconds
+            message (str): Message data
+        """
+
+        data = {"recording_id": self.id, "measurement_id": user_log_id, "time": time, "message": message}
+        request = {"type": "request", "cmd": "recording_append_user_log", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def offset_user_log(self, user_log_id, offset):
+        """ Offset a user log
+
+        Args:
+            user_log_id (str): Id of the user log
+            offset (float): Time to offset in seconds
+        """
+
+        data = {"recording_id": self.id, "measurement_id": user_log_id, "offset": offset}
+        request = {"type": "request", "cmd": "recording_offset_user_log", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+
+    class LogEntry:
+        def __init__(self, timestamp, message):
+            self.timestamp = timestamp
+            self.message = message
+
+        def __str__(self):
+            return f"time: {self.timestamp}, message: {self.message}"
+
+
+    def get_user_log_data(self, user_log_id, time_from, time_to, filter_string, page = 1, page_size = 1000):
+        """ Get data from user log
+
+        Args:
+            user_log_id (str): Id of the user log
+            time_from (float): Start of range in seconds
+            time_to (float): End of range in seconds
+            filter_string (str): Filter to apply to records
+            page (int): Page number to get
+            page_size (int): Number of records in one page
+
+        """
+
+        data = {"recording_id": self.id, "user_log_id": user_log_id, "from": time_from, "to": time_to, "filter": filter_string, "page": page, "page_size": page_size}
+        request = {"type": "request", "cmd": "recording_get_user_log_data", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+        return response["data"]
+
+
+    def iter_user_log_data(self, user_log_id, time_from, time_to, filter_string = ""):
+        """ Get an iterator to user log data
+
+        Args:
+            user_log_id (str): ID of the user log
+            time_from (float): Start of the range in seconds
+            time_to (float): End of the range in seconds
+            filter_string (str): Filter to apply to messages
+        """
+
+        page = self.get_user_log_data(user_log_id, time_from, time_to, filter_string, 1)
+
+        while True:
+            for d in page['values']:
+                yield self.LogEntry(d["timestamp"], d["value"])
+
+            if page['page'] >= page['pages_total']:
+                break
+
+            page = self.get_user_log_data(user_log_id, time_from, time_to, filter_string, page['page'] + 1)

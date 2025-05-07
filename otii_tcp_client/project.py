@@ -140,3 +140,22 @@ class Project:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def create_user_log(self, user_log_id):
+        """ Create a user log.
+
+        Args:
+            user_log_id (str): Id of the user log to create
+
+        Returns:
+            str: Id of created user log
+
+        """
+
+        data = {"project_id": self.id, "id": id}
+        request = {"type": "request", "cmd": "project_create_user_log", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+        return response["data"]["id"]
