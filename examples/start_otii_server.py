@@ -3,8 +3,8 @@
 Otii 3 Start otii_server
 '''
 import subprocess
-from otii_tcp_client import otii_client
 from basic_measurement import basic_measurement
+from otii_tcp_client import otii_client
 
 # Remember to add the directory of the otii_server to the path.
 OTII_SERVER = 'otii_server'

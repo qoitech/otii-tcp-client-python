@@ -2,6 +2,7 @@
 # pylint: disable=missing-module-docstring
 import json
 import os
+import time
 from enum import Enum
 from otii_tcp_client import otii, otii_connection, otii_exception
 
@@ -9,6 +10,9 @@ class LicensingMode(Enum):
     # pylint: disable=missing-class-docstring
     AUTO = 'auto'
     MANUAL = 'manual'
+
+class OtiiClientException(Exception):
+    pass
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 1905
@@ -43,6 +47,7 @@ class Connect(otii.Otii):
                  ):
         self.auto_logged_in = False
         self.auto_reserved_licenses = []
+        try_until = time.time() + try_for_seconds
 
         connection = otii_connection.OtiiConnection(host, port)
         connect_response = connection.connect_to_server(try_for_seconds = try_for_seconds)
@@ -51,14 +56,12 @@ class Connect(otii.Otii):
         super().__init__(connection)
 
         if licensing == LicensingMode.AUTO:
-            try:
-                self.get_licenses()
-            except otii_exception.Otii_Exception:
+            if not self.is_logged_in():
                 self._login(credentials)
                 self.auto_logged_in = True
 
             wanted_licenses = [ 'Automation' ] if licenses is None else licenses
-            self._reserve_licenses(wanted_licenses)
+            self._reserve_licenses(wanted_licenses, try_until)
 
     def __enter__(self):
         return self
@@ -80,31 +83,46 @@ class Connect(otii.Otii):
             except KeyError:
                 pass
 
-    def _reserve_licenses(self, licenses):
+    def _reserve_licenses(self, licenses, try_until):
         # pylint: disable=missing-function-docstring
         all_licenses = self.get_licenses()
         for wanted_license in licenses:
-            reserved_by_me = [
-                license
-                for license in all_licenses
-                if license['reserved_to'] != ''
-                    and license['available']
-                    and license['type'] in LICENSE_MAP
-                    and wanted_license in LICENSE_MAP[license['type']]
-            ]
-            available = [
-                license
-                for license in all_licenses
-                if license['reserved_to'] == ''
-                    and license['available']
-                    and license['type'] in LICENSE_MAP
-                    and wanted_license in LICENSE_MAP[license['type']]
-            ]
-            if len(reserved_by_me) == 0:
-                if len(available) > 0:
-                    license_id = available[0]['id']
-                    self.reserve_license(license_id)
-                    self.auto_reserved_licenses.append(license_id)
+            reserved = False
+            while not reserved:
+                try:
+                    self._reserve_license(all_licenses, wanted_license)
+                    reserved = True
+                except OtiiClientException:
+                    if time.time() > try_until:
+                        print('Timed out')
+                        raise
+                    time.sleep(1.0)
+                    all_licenses = self.get_licenses()
+
+    def _reserve_license(self, all_licenses, wanted_license):
+        reserved_by_me = [
+            license
+            for license in all_licenses
+            if license['reserved_to'] != ''
+                and license['available']
+                and license['type'] in LICENSE_MAP
+                and wanted_license in LICENSE_MAP[license['type']]
+        ]
+        available = [
+            license
+            for license in all_licenses
+            if license['reserved_to'] == ''
+                and license['available']
+                and license['type'] in LICENSE_MAP
+                and wanted_license in LICENSE_MAP[license['type']]
+        ]
+        if len(reserved_by_me) == 0:
+            if len(available) > 0:
+                license_id = available[0]['id']
+                self.reserve_license(license_id)
+                self.auto_reserved_licenses.append(license_id)
+            else:
+                raise OtiiClientException('Cannot reserve licenses')
 
     def disconnect(self):
         # pylint: disable=missing-function-docstring

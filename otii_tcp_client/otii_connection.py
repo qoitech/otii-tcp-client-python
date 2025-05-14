@@ -65,10 +65,10 @@ class OtiiConnection:
                 self.sock.connect((self.host_address, self.host_port))
                 connected = True
             except socket.error:
+                self.sock.close()
+                self.sock = None
                 elapsed_time = datetime.datetime.now().timestamp() - start_time
                 if elapsed_time > try_for_seconds:
-                    self.sock.close()
-                    self.sock = None
                     raise
                 time.sleep(0.5)
 

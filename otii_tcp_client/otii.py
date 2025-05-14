@@ -141,6 +141,34 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["licenses"]
 
+    def has_license(self, license_type):
+        """ Check if user has a reserved license
+
+            Args:
+                license_type: Type of licenses
+
+            Returns:
+                bool: True if license is reserved, otherwise False
+        """
+        data = {"license_type": license_type}
+        request = {"type": "request", "cmd": "otii_has_license", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["has_license"]
+
+    def is_logged_in(self):
+        """ Check if user is logged in
+
+            Returns:
+                bool: True if user is logged in, otherwise False
+        """
+        request = {"type": "request", "cmd": "otii_is_logged_in"}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return response["data"]["logged_in"]
+
     def login(self, username, password):
         """ Login user
 

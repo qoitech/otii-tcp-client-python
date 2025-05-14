@@ -43,6 +43,8 @@ class Otii_Exception(Exception):
                 self.message = "Error: \"" + self.type + "\"\tMissing key: \"" + response["data"]["key"] + "\""
         elif self.type == "No license":
             self.message = response
+        elif self.type == "Not logged in":
+            self.message = response
         elif self.type == "Not ready":
             self.message = response
         elif self.type == "Not able to parse request":
