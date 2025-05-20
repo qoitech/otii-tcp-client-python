@@ -1,8 +1,13 @@
-# Python client for Otii TCP-server
+# Otii TCP Client for Python
 
 The otii_tcp_client is a Python package for controlling the [Otii Automation Toolbox](https://www.qoitech.com/automation-toolbox/).
 
 Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to Otii 3.
+
+New functionality in client v1.0.11 requiring [Otii software v3.5.5 or later](https://www.qoitech.com/download):
+
+- `otii.connect` now waits for both a valid connection and for a license to be available.
+- Added `otii.is_logged_in` and `otii.has_license`.
 
 New functionality in client v1.0.10:
 
