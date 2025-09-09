@@ -122,6 +122,19 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
+    def enable_legacy_sink(self, enable):
+        """ Enable or disable legacy sink mode.
+
+        Args:
+            enable (bool): True to enable legacy sink mode, False to disable.
+
+        """
+        data = {"device_id": self.id, "enable": enable}
+        request = {"type": "request", "cmd": "arc_enable_legacy_sink", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def enable_uart(self, enable):
         """ Enable UART.
 
