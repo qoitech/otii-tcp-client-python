@@ -18,6 +18,9 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Development Status :: 5 - Production/Stable",
 ]
+dependencies = [
+    "python-dateutil",
+]
 
 [project.urls]
 Homepage = "https://github.com/qoitech/otii-tcp-client-python"
