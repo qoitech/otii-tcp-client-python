@@ -7,7 +7,7 @@ class Project:
 
     Attributes:
         id (int): ID of project.
-        connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+        connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
     def __init__(self, id, connection):
@@ -15,7 +15,7 @@ class Project:
         Args:
             id (int): ID of project.
             filename (str): Name of project. Set when project is opened or saved.
-            connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+            connection (:py:class:`OtiiConnection`): Object to handle connection to the Otii server.
 
         """
         self.id = id
@@ -55,7 +55,7 @@ class Project:
         """ Get the latest recording in the project.
 
         Returns:
-            :obj:Recording: Recording Object.
+            :py:class:`.Recording`
 
         """
         data = {"project_id": self.id}
@@ -72,7 +72,7 @@ class Project:
         """ List captured recordings.
 
         Returns:
-            list: List of recording objects.
+            :list[:py:class:`.Recording`]
 
         """
         data = {"project_id": self.id}

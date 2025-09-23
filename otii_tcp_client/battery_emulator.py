@@ -7,14 +7,14 @@ class BatteryEmulator:
 
     Attributes:
         id (string): Id of the battery emulator.
-        connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+        connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
     def __init__(self, battery_emulator_id, connection):
         """
         Args:
             battery_emulator_id (string): Id of the battery emulator.
-            connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+            connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
         """
         self.id = battery_emulator_id

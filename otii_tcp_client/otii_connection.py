@@ -53,7 +53,17 @@ class OtiiConnection:
             try_for_seconds (int): Seconds to try to connect.
 
         Returns:
-            dict: Decoded JSON connection response.
+            Server information::
+
+                {
+                    "type": "information",
+                    "info": "connected",
+                    "data": {
+                        "otii_version": "3.5.5",
+                        "protocol_version": "0.1",
+                        "server": "otii-server"
+                    }
+                }
 
         """
         start_time = datetime.datetime.now().timestamp()
@@ -112,6 +122,9 @@ class OtiiConnection:
     def send(self, request):
         """ Send request without waiting for response.
 
+        Args:
+            request (dict): Server request.
+
         """
         json_msg = json.dumps(request)
         self.send_request(json_msg)
@@ -120,7 +133,7 @@ class OtiiConnection:
         """ Send request and receive response from server.
 
         Args:
-            message (str): JSON encoded server request.
+            request (dict): Server request.
             timeout (int, optional): Transmission timeout (s), default 3s.
 
         Returns:
@@ -139,7 +152,7 @@ class OtiiConnection:
         """ Send request to server.
 
         Args:
-            message (str): JSON encoded server request.
+            message (dict): Server request.
 
         """
         totalsent = 0

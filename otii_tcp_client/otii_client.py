@@ -159,12 +159,12 @@ class OtiiClient:
             environment variables OTII_USERNAME and OTII_PASSWORD.
 
         Args:
-            host (str): Server address.
-            port (int): Connection port number.
-            try_for_seconds (int): Seconds to try to connect.
-            licensing (str): 'auto' or 'manual'.
-            credentials (str): Path to a file containing credentials.
-            licenses (str[]): Array of license types ('Automation', 'Battery') needed.
+            host (str, optional): Server address.
+            port (int, optional): Connection port number.
+            try_for_seconds (int, optional): Seconds to try to connect.
+            licensing (str, optional): 'auto' or 'manual'.
+            credentials (str, optional): Path to a file containing credentials.
+            licenses (str[], optional): Array of license types ('Automation', 'Battery') needed.
 
         """
         self.otii = Connect(host, port, try_for_seconds, licensing, credentials, licenses)

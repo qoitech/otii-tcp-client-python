@@ -12,14 +12,14 @@ class Arc:
         type (str): Device type, "Arc" for Arc devices.
         id (str): ID of the Arc device.
         name (str): Name of the Arc device.
-        connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+        connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
     def __init__(self, device_dict, connection):
         """
         Args:
             device_dict (dict): Dictionary with Arc parameters.
-            connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+            connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
         """
         self.type = device_dict["type"]
@@ -67,12 +67,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def enable_battery_profiling(self, enable):
-        """ This will start the discharge profiling of a connected battery.
-
-        Args:
-            enable (bool): True to start battery profiling, False to stop.
-
-        """
+        # pylint: disable=missing-class-docstring
         data = {"device_id": self.id, "enable": enable}
         request = {"type": "request", "cmd": "arc_enable_battery_profiling", "data": data}
         response = self.connection.send_and_receive(request)
@@ -81,6 +76,27 @@ class Arc:
 
     def enable_channel(self, channel, enable):
         """ Enable or disable measurement channel.
+
+        .. table:: Available channels
+
+            ======= ============== =======
+            Channel Description    Unit
+            ======= ============== =======
+            **mc**  Main Current   A
+            **mp**  Main Power     W
+            **mv**  Main Voltage   V
+            **ac**  ADC Current    A
+            **ac**  ADC Power      W
+            **av**  ADC Voltage    V
+            **sp**  Sense+ Voltage V
+            **sn**  Sense- Voltage V
+            **vb**  VBUS           V
+            **vj**  DC Jack        V
+            **tp**  Temperature    °C
+            **rx**  UART logs      text
+            **i1**  GPI1           Digital
+            **i2**  GPI2           Digital
+            ======= ============== =======
 
         Args:
             channel (str): Name of the channel to enable or disable.
@@ -149,6 +165,8 @@ class Arc:
 
     def get_channel_samplerate(self, channel):
         """ Get channel sample rate.
+
+        For available channels see :py:meth:`.Arc.enable_channel`
 
         Args:
             channel (str): Name of the channel to get the sample rate for.
@@ -313,7 +331,10 @@ class Arc:
 
     def get_value(self, channel):
         """ Get value from specified channel.
+
         This is not available for the rx channel.
+
+        For available channels see :py:meth:`.Arc.enable_channel`
 
         Args:
             channel (str): Name of the channel to get value from.
@@ -384,13 +405,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def set_battery_profile(self, value):
-        """ Set the battery profile.
-
-        Args:
-            value (list): The list of battery profile step dicts (max 10).
-            Each dict is of the { "current|resistance|power" : SI value, "duration" : seconds } form.
-
-        """
+        # pylint: disable=missing-class-docstring
         data = {"device_id": self.id, "value": value}
         request = {"type": "request", "cmd": "arc_set_battery_profile", "data": data}
         response = self.connection.send_and_receive(request)
@@ -399,6 +414,8 @@ class Arc:
 
     def set_channel_samplerate(self, channel, value):
         """ Set the sample rate of a channel
+
+        For available channels see :py:meth:`.Arc.enable_channel`
 
         Args:
             channel (str): Name of the channel to set the sample rate for.
@@ -465,7 +482,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def set_main_voltage(self, value):
-        """ Get data entries from a specified channel of a specific recording.
+        """ Set the main voltage on Arc.
 
         Args:
             value (float): Value to set main voltage to (V).
@@ -494,7 +511,7 @@ class Arc:
         """ Set power regulation mode.
 
         Args:
-            mode (float): One of the following: "voltage", "current", "off".
+            mode (float): One of the following: "voltage", "current", "inline", "off".
 
         """
         data = {"device_id": self.id, "mode": mode}
@@ -553,7 +570,7 @@ class Arc:
             soc_tracking (bool, optional): State of Charge tracking, defaults to True.
 
         Returns:
-            battery_emulator(:obj:BatteryEmulator): Battery emulator
+            :py:class:`.BatteryEmulator`
 
         """
         data = {
@@ -611,16 +628,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
 
     def wait_for_battery_data(self, timeout):
-        """ Wait for battery data.
-
-        Args:
-            timeout (int): Maximum timeout in ms. May time out earlier if another Arc is returning battery data.
-        Returns:
-            dict: Battery data dict or None if timeout. The dict will contain "timestamp" in seconds,
-                           "iteration", "step", "voltage" at the end of the current step and "discharge" in coulombs accumulating
-                           the total discharge of the battery since profiling start.
-
-        """
+        # pylint: disable=missing-class-docstring
         data = {"device_id": self.id, "timeout": timeout}
         request = {"type": "request", "cmd": "arc_wait_for_battery_data", "data": data}
         response = self.connection.send_and_receive(request, 60 + (timeout / 1000))

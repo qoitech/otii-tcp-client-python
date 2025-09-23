@@ -6,13 +6,13 @@ class Otii:
     """ Class to define an Otii object.
 
     Attributes:
-        connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+        connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
     def __init__(self, connection=None):
         """
         Args:
-            connection (:obj:OtiiConnection): Object to handle connection to the Otii server.
+            connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
         """
         self.connection = connection
@@ -21,7 +21,7 @@ class Otii:
         """ Create a new project.
 
         Returns:
-            int: ID of created project.
+            :py:class:`.Project`
 
         """
         request = {"type": "request", "cmd": "otii_create_project"}
@@ -34,7 +34,7 @@ class Otii:
         """ Returns the active project if there is one.
 
         Returns:
-            :obj:Project: Project object.
+            :py:class:`.Project`
 
         """
         request = {"type": "request", "cmd": "otii_get_active_project"}
@@ -50,6 +50,34 @@ class Otii:
 
         Args:
             battery_profile_id (string): Battery profile id.
+
+        Returns:
+            Battery profile info::
+
+                {
+                    "battery_profile_id":"6ef4a003-22c6-44d1-9e37-21de0526f5f2"
+                    "name":"AAA Super Charged",
+                    "battery": {
+                        "capacity":207.07,
+                        "capacityunit":"mAh",
+                        "cutoffvoltage":3,
+                        "manufacturer":"MikroE",
+                        "maxtemperature":60,
+                        "mintemperature":-20,
+                        "model":"190mAh_LiPo",
+                        "size":"",
+                        "sizeunit":"mm",
+                        "temperatureunit":"°C",
+                        "voltage":3.6,
+                        "voltageunit":"V",
+                        "weight":0,
+                        "weightunit":"g",
+                        "worktemperature":20
+                    }
+                    "discharge_tables": [{
+                        "dischargetable_id":"22dbed46-1b83-4e04-8964-aa4e5187f3cc"
+                    }]
+                }
         """
         data = {"battery_profile_id": battery_profile_id}
         request = {"type": "request", "cmd": "otii_get_battery_profile_info", "data": data}
@@ -62,7 +90,19 @@ class Otii:
         """ Returns a list of available battery profiles.
 
         Returns:
-            list: List of battery profile objects
+            list: List of battery profile objects::
+
+                [{
+                    "battery_profile_id": "1ce61608-9164-41a9-affb-221f1ea9f187",
+                    "name": "CR2032-NoName",
+                    "manufacturer": "NoName",
+                    "model": "CR2032"
+                }, {
+                    "battery_profile_id": "b2ce2796-80f7-4386-8759-be31466927b8",
+                    "name": "CR2450-NoName",
+                    "manufacturer": "NoName",
+                    "model": "CR2450"
+                }]
 
         """
         request = {"type": "request", "cmd": "otii_get_battery_profiles"}
@@ -96,8 +136,17 @@ class Otii:
             devicefilter (tuple, optional): Override default device filter
 
         Returns:
-            list: List of Arc device objects.
+            List of Arc device objects::
 
+                [{
+                    "device_id": "Arc12345678912345678912345678900001",
+                    "name": "Arc I",
+                    "type": "Arc"
+                }, {
+                    "device_id": "Arc12345678912345678912345678900005",
+                    "name": "Arc II",
+                    "type": "Arc"
+                }]
         """
         data = {"timeout": timeout}
         request = {"type": "request", "cmd": "otii_get_devices", "data": data}
@@ -118,20 +167,20 @@ class Otii:
         """ Return a list of all licenses for logged in user
 
         Returns:
-            list: List of licenses
-
-            .. code-block:: json
+            List of licenses::
 
                 [{
                     "id":1234,
-                    "type":"Pro",
+                    "type":"Automation",
                     "available":true,
                     "reserved_to":"",
-                    "hostname":"",
-                    "addons":[{
-                        "id":"Automation",
-                        "attributes":null
-                    }]
+                    "hostname":""
+                }, {
+                    "id":5432,
+                    "type":"Battery",
+                    "available":true,
+                    "reserved_to":"joe",
+                    "hostname":"computer_one"
                 }]
 
         """
@@ -200,7 +249,7 @@ class Otii:
             False not to.
 
         Returns:
-            int: ID of opened project.
+            :py:class:`.Project`
 
         """
         data = {"filename": filename, "force": force, "progress": progress}
