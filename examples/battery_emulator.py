@@ -23,9 +23,15 @@ Alternatively you can set the environment variables OTII_USERNAME and OTII_PASSW
 import time
 import sys
 from datetime import datetime
-from otii_tcp_client import otii_client
+from typing import Optional, TypedDict
+from otii_tcp_client import arc, otii_client, project
 
-TEST_SCHEME = [{
+class TestConfig(TypedDict):
+    ''' Test configuration '''
+    name: str
+    soc: list[int]
+
+TEST_SCHEME: list[TestConfig] = [{
     'name': 'LiPo-ICP632136HPST-Renata-WiFi-20',
     'soc': [ 100, 50, 20 ],
 }, {
@@ -39,7 +45,7 @@ TEST_SCHEME = [{
 class AppException(Exception):
     '''Application Exception'''
 
-def voltage_sweep_with_uart(otii):
+def voltage_sweep_with_uart(otii: otii_client.Connect) -> None:
     ''' Voltage sweep '''
     # Connect to Otii Arc/Ace
     devices = otii.get_devices()
@@ -62,7 +68,7 @@ def voltage_sweep_with_uart(otii):
     series = 1
     parallel = 1
     battery_profile_id = get_battery_profile_id(profiles, TEST_SCHEME[0]['name'])
-    soc = TEST_SCHEME[0]['soc']
+    soc = TEST_SCHEME[0]['soc'][0]
     battery_emulator = device.set_supply_battery_emulator(battery_profile_id,
                                                           series = series,
                                                           parallel = parallel,
@@ -94,6 +100,7 @@ def voltage_sweep_with_uart(otii):
             if timestamp_message is not None:
                 print(f"Message found at timestamp: {timestamp_message}")
             recording = project.get_last_recording()
+            assert recording is not None
             recording.rename(f"SOC {soc}, Profile {name}")
             time.sleep(wait_after_sleep)
 
@@ -103,7 +110,7 @@ def voltage_sweep_with_uart(otii):
 
     print("Done!")
 
-def get_battery_profile_id(profiles, name):
+def get_battery_profile_id(profiles: list[dict], name: str) -> str:
     ''' Get battery profile id '''
     profile_id = [
         profile['battery_profile_id']
@@ -114,13 +121,14 @@ def get_battery_profile_id(profiles, name):
         raise AppException(f'Battery profile for {name} not installed')
     return profile_id[0]
 
-def wait_for_message(project, device, message, maximum_time = 0):
+def wait_for_message(project: project.Project, device: arc.Arc, message: str, maximum_time: int = 0) -> Optional[str]:
     ''' Wait for message on UART '''
     start_time = datetime.now()
     found_message = False
     timestamp_message = None
     # Get the data from the recording
     recording = project.get_last_recording()
+    assert recording is not None
     previous_samples = recording.get_channel_data_count(device.id, "rx")
 
     # Loop until message is found or time-out
@@ -144,7 +152,7 @@ def wait_for_message(project, device, message, maximum_time = 0):
             break
     return timestamp_message
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect(licenses = [ 'Automation', 'Battery' ]) as otii:

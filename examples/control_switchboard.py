@@ -17,7 +17,7 @@ from otii_tcp_client import otii_client
 class AppException(Exception):
     '''Application Exception'''
 
-def control_switchboard(otii):
+def control_switchboard(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to control the switchboard.
     '''
@@ -44,7 +44,7 @@ def control_switchboard(otii):
     else:
         device.enable_5v(0)
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

@@ -4,14 +4,15 @@ import datetime
 import json
 import socket
 import time
+from typing import Optional
 
 class DisconnectedException(Exception):
     # pylint: disable=missing-class-docstring
     pass
 
-trans_id = 0
+trans_id: int = 0
 
-def get_new_trans_id():
+def get_new_trans_id() -> str:
     # pylint: disable=missing-function-docstring
     global trans_id
     trans_id += 1
@@ -25,11 +26,16 @@ class OtiiConnection:
         host_port (int): Connection port number.
         recv_buffer (int): Size of receive buffer.
         sock (socket): Communication socket.
+        recv_msg (str): Buffer
 
     """
-    recv_msg = ""
+    host_address: str
+    host_port: int
+    recv_buffer: int
+    sock: Optional[socket.socket]
+    recv_msg: str = ""
 
-    def __init__(self, address, port):
+    def __init__(self, address: str, port: int):
         """
         Args:
             address (str): Server IP address.
@@ -40,13 +46,14 @@ class OtiiConnection:
         self.host_port = port
         self.recv_buffer = 128 * 1024
 
-    def close_connection(self):
+    def close_connection(self) -> None:
         """ Close connection to server.
 
         """
-        self.sock.close()
+        if self.sock is not None:
+            self.sock.close()
 
-    def connect_to_server(self, *, try_for_seconds=0):
+    def connect_to_server(self, *, try_for_seconds: int = 0) -> dict:
         """ Connect to server.
 
         Args:
@@ -75,8 +82,9 @@ class OtiiConnection:
                 self.sock.connect((self.host_address, self.host_port))
                 connected = True
             except socket.error:
-                self.sock.close()
-                self.sock = None
+                if self.sock is not None:
+                    self.sock.close()
+                    self.sock = None
                 elapsed_time = datetime.datetime.now().timestamp() - start_time
                 if elapsed_time > try_for_seconds:
                     raise
@@ -84,7 +92,7 @@ class OtiiConnection:
 
         return self.receive_response(3, "")
 
-    def receive_response(self, timeout_seconds, trans_id):
+    def receive_response(self, timeout_seconds: Optional[float], trans_id: str) -> dict:
         """ Receive a JSON formated response from the server.
 
         Args:
@@ -95,6 +103,9 @@ class OtiiConnection:
             dict: Decoded JSON server response.
 
         """
+        if self.sock is None:
+            raise Exception("Not connected")
+
         response = None
         self.sock.settimeout(timeout_seconds)
         while not response:
@@ -119,7 +130,7 @@ class OtiiConnection:
                     response = json_data
         return response
 
-    def send(self, request):
+    def send(self, request: str) -> None:
         """ Send request without waiting for response.
 
         Args:
@@ -129,7 +140,7 @@ class OtiiConnection:
         json_msg = json.dumps(request)
         self.send_request(json_msg)
 
-    def send_and_receive(self, request, timeout=3):
+    def send_and_receive(self, request: dict, timeout: Optional[float] = 3) -> dict:
         """ Send request and receive response from server.
 
         Args:
@@ -148,13 +159,16 @@ class OtiiConnection:
             data["error"] = "Unexpected Transmission ID"
         return data
 
-    def send_request(self, message):
+    def send_request(self, message: str) -> None:
         """ Send request to server.
 
         Args:
-            message (dict): Server request.
+            message (str): Server request.
 
         """
+        if self.sock is None:
+            raise Exception("Not connected")
+
         totalsent = 0
         message = message + "\r\n"
         msg = message.encode("utf-8")

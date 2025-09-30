@@ -13,7 +13,7 @@ using the following format:
 
 '''
 import time
-from otii_tcp_client import otii_client
+from otii_tcp_client import arc, otii_client
 
 DEVICE1 = 'Arc 1'
 DEVICE2 = 'Arc 2'
@@ -24,7 +24,7 @@ DEVICE2_MAIN_VOLTAGE = 3.7
 class AppException(Exception):
     '''Application Exception'''
 
-def get_device(otii, name):
+def get_device(otii: otii_client.Connect, name: str) -> arc.Arc:
     '''
     Find a named device.
     Will throw an exception if no device with that name is found,
@@ -37,7 +37,7 @@ def get_device(otii, name):
         raise AppException(f'Multiple devices named {name} found')
     return devices[0]
 
-def multiple_devices(otii):
+def multiple_devices(otii: otii_client.Connect) -> None:
     '''
     This example shows you how you can record data
     from multiple devices at once.
@@ -66,7 +66,7 @@ def multiple_devices(otii):
 
     project.stop_recording()
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-module-docstring
-from otii_tcp_client import otii_exception, recording
+from typing import Optional
+from otii_tcp_client import otii_connection, otii_exception, recording
 
 class Project:
     """ Class to define an Otii Project object.
@@ -10,7 +11,10 @@ class Project:
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, id, connection):
+    id: int
+    connection: otii_connection.OtiiConnection
+
+    def __init__(self, id: int, connection: otii_connection.OtiiConnection):
         """
         Args:
             id (int): ID of project.
@@ -22,7 +26,7 @@ class Project:
         self.filename = ""
         self.connection = connection
 
-    def close(self, force=False ):
+    def close(self, force: bool = False) -> None:
         """ Close the project.
 
         Args:
@@ -36,7 +40,7 @@ class Project:
             raise otii_exception.Otii_Exception(response)
         self.id = -1
 
-    def crop_data(self, start, end):
+    def crop_data(self, start: float, end: float) -> None:
         """ Crop all data before start and after end.
 
         Args:
@@ -51,7 +55,7 @@ class Project:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def get_last_recording(self):
+    def get_last_recording(self) -> Optional[recording.Recording]:
         """ Get the latest recording in the project.
 
         Returns:
@@ -68,7 +72,7 @@ class Project:
 
         return recording.Recording(response["data"], self.connection)
 
-    def get_recordings(self):
+    def get_recordings(self) -> list[recording.Recording]:
         """ List captured recordings.
 
         Returns:
@@ -86,7 +90,7 @@ class Project:
             recording_objects.append(recording_object)
         return recording_objects
 
-    def save(self, progress=False):
+    def save(self, progress: bool = False) -> str:
         """ Save the project.
 
         Args:
@@ -100,7 +104,7 @@ class Project:
             raise otii_exception.Otii_Exception({"errorcode": "Missing file name"})
         return self.save_as(self.filename, True, progress)
 
-    def save_as(self, filename, force=False, progress=False):
+    def save_as(self, filename: str, force: bool = False, progress: bool = False) -> str:
         """ Save the project as.
 
         Args:
@@ -121,7 +125,7 @@ class Project:
         self.filename = response["data"]["filename"]
         return response["data"]["filename"]
 
-    def start_recording(self):
+    def start_recording(self) -> None:
         """ Start a new recording.
 
         """
@@ -131,7 +135,7 @@ class Project:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def stop_recording(self):
+    def stop_recording(self) -> None:
         """ Stop the running recording.
 
         """
@@ -141,7 +145,7 @@ class Project:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def create_user_log(self, user_log_id):
+    def create_user_log(self, user_log_id: str) -> str:
         """ Create a user log.
 
         Args:

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from typing import Union
+
 class Otii_Exception(Exception):
     """ Class to define an Otii Exception object
 
@@ -7,7 +9,10 @@ class Otii_Exception(Exception):
         message (str): Human readable error message.
 
     """
-    def __init__(self, response):
+    type: str
+    message: Union[str, dict]
+
+    def __init__(self, response: dict) -> None:
         """
         Args:
             response (dict): Dictionary with error message from server.

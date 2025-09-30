@@ -17,7 +17,7 @@ using the following format:
 import time
 import os
 from datetime import datetime
-from otii_tcp_client import otii_client
+from otii_tcp_client import arc, otii_client, recording
 
 MESSAGE_POLLING_TIME = 0.2
 MEASUREMENT_TIMEOUT = 60*60*4 # 4 hours
@@ -28,7 +28,10 @@ PROJECT_FOLDER = os.path.join(os.getcwd(), 'nRF9151-DK_test')
 class AppException(Exception):
     '''Application Exception'''
 
-def error_response(recording, device, ok_text, error_text):
+def error_response(recording: recording.Recording,
+                   device: arc.Arc,
+                   ok_text: str,
+                   error_text: str) -> bool:
     ''' Wait for message on UART '''
     previous_samples = recording.get_channel_data_count(device.id, 'rx')
     error_message = False
@@ -70,7 +73,7 @@ def error_response(recording, device, ok_text, error_text):
 
     return error_message
 
-def reset_nrf6191_dk(recording, device):
+def reset_nrf6191_dk(recording: recording.Recording, device: arc.Arc) -> None:
     ''' Reset nRF91x1-dk '''
     print('Resetting nRF91x1-dk')
     device.set_main(False)
@@ -82,7 +85,7 @@ def reset_nrf6191_dk(recording, device):
     error_response(recording, device, 'Ready', 'ERROR')
     print('nRF91x1-dk OK')
 
-def send_commands(recording, device, commands):
+def send_commands(recording: recording.Recording, device: arc.Arc, commands: list[str]) -> None:
     ''' Send commands to device '''
     for command in commands:
         time.sleep(0.5)
@@ -93,7 +96,7 @@ def send_commands(recording, device, commands):
             print(f'Command sent successfully: {command}')
 
 # pylint: disable=too-many-statements
-def send_at_commands(otii):
+def send_at_commands(otii: otii_client.Connect) -> None:
     '''
     Configure Otii Arc or Ace.
     Send AT commands to a connected DUT via UART TX and receive responses via UART RX.
@@ -122,6 +125,7 @@ def send_at_commands(otii):
     # Start a recording and get reference to it
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
 
     # Turn on the main output of the selected device
     device.set_main(True)
@@ -139,6 +143,7 @@ def send_at_commands(otii):
     # Test of LTE-M mode, no power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('LTE-M, no power save')
     send_commands(recording, device, ['AT%XSYSTEMMODE=1,0,1,0','AT+CEDRXS=0','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -149,6 +154,7 @@ def send_at_commands(otii):
     # Test of LTE-M mode, with eDRX power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('LTE-M, eDRX timer 40.96s')
     send_commands(recording, device, ['AT%XSYSTEMMODE=1,0,1,0','AT+CEDRXS=2,4,"0011"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -159,6 +165,7 @@ def send_at_commands(otii):
     # Test of NB-IoT mode, no power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('NB-IoT, no power save')
     send_commands(recording, device, ['AT%XSYSTEMMODE=0,1,1,0','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -169,6 +176,7 @@ def send_at_commands(otii):
     # Test of NB-IoT mode, with eDRX power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('NB-IoT, eDRX timer 40.96')
     send_commands(recording, device, ['AT%XSYSTEMMODE=0,1,1,0','AT+CEDRXS=2,5,"0011"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -179,6 +187,7 @@ def send_at_commands(otii):
     # Test of LTE-M mode, with PSM power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('LTE-M, PSM T3412 timer 60min, T3324 timer 2min')
     send_commands(recording, device, ['AT%XSYSTEMMODE=1,0,1,0','AT+CPSMS=1,"","","00100001","00100010"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -189,6 +198,7 @@ def send_at_commands(otii):
     # Test of NB-IoT mode, with PSM power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('NB-IoT, PSM T3412 timer 60min, T3324 timer 2min')
     send_commands(recording, device, ['AT%XSYSTEMMODE=0,1,1,0','AT+CPSMS=1,"","","00100001","00100010"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -199,6 +209,7 @@ def send_at_commands(otii):
     # Test of NB-IoT mode, with PSM and eDRX power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('NB-IoT, PSM and eDRX')
     send_commands(recording, device, ['AT%XSYSTEMMODE=0,1,1,0','AT+CPSMS=1,"","","00100001","00100010"','AT+CEDRXS=2,5,"0011"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -209,6 +220,7 @@ def send_at_commands(otii):
     # Test of LTE-M mode, with PSM and eDRX power save
     project.start_recording()
     recording = project.get_last_recording()
+    assert recording is not None
     recording.rename('LTE-M, PSM and eDRX')
     send_commands(recording, device, ['AT%XSYSTEMMODE=1,0,1,0','AT+CPSMS=1,"","","00100001","00100010"','AT+CEDRXS=2,4,"0011"','AT+CFUN=1'])
     time.sleep(MEASUREMENT_TIMEOUT)
@@ -220,8 +232,7 @@ def send_at_commands(otii):
     device.enable_5v(0)
     project.save()
 
-
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

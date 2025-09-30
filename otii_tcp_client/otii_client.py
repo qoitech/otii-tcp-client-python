@@ -4,6 +4,8 @@ import json
 import os
 import time
 from enum import Enum
+from typing import Optional
+from typing_extensions import Self
 from otii_tcp_client import otii, otii_connection, otii_exception
 
 class LicensingMode(Enum):
@@ -37,14 +39,18 @@ LICENSE_MAP = {
 
 class Connect(otii.Otii):
     # pylint: disable=missing-class-docstring
+    auto_logged_in: bool
+    auto_reserved_licenses: list[int]
+    try_until: int
+
     def __init__(self,
-                 host,
-                 port,
-                 try_for_seconds,
-                 licensing,
-                 credentials,
-                 licenses,
-                 ):
+                 host: str,
+                 port: int,
+                 try_for_seconds: int,
+                 licensing: LicensingMode,
+                 credentials: str,
+                 licenses: Optional[list[str]],
+                 ) -> None:
         self.auto_logged_in = False
         self.auto_reserved_licenses = []
         try_until = time.time() + try_for_seconds
@@ -63,13 +69,13 @@ class Connect(otii.Otii):
             wanted_licenses = [ 'Automation' ] if licenses is None else licenses
             self._reserve_licenses(wanted_licenses, try_until)
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb):
+    def __exit__(self, exc_type: None, exc_value: None, exc_tb: None) -> None:
         self.disconnect()
 
-    def _login(self, credentials_path):
+    def _login(self, credentials_path: str) -> None:
         # pylint: disable=missing-function-docstring
         if os.path.isfile(credentials_path):
             with open(credentials_path, encoding='utf-8') as file:
@@ -83,7 +89,7 @@ class Connect(otii.Otii):
             except KeyError:
                 pass
 
-    def _reserve_licenses(self, licenses, try_until):
+    def _reserve_licenses(self, licenses: list[str], try_until: float) -> None:
         # pylint: disable=missing-function-docstring
         all_licenses = self.get_licenses()
         for wanted_license in licenses:
@@ -99,7 +105,7 @@ class Connect(otii.Otii):
                     time.sleep(1.0)
                     all_licenses = self.get_licenses()
 
-    def _reserve_license(self, all_licenses, wanted_license):
+    def _reserve_license(self, all_licenses: list[dict], wanted_license: str) -> None:
         reserved_by_me = [
             license
             for license in all_licenses
@@ -124,7 +130,7 @@ class Connect(otii.Otii):
             else:
                 raise OtiiClientException('Cannot reserve licenses')
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         # pylint: disable=missing-function-docstring
         for license_id in self.auto_reserved_licenses:
             self.return_license(license_id)
@@ -134,17 +140,19 @@ class Connect(otii.Otii):
 
 class OtiiClient:
     """ Use this class to easily create a connected Otii object."""
-    def __init__(self):
+    otii: Optional[Connect]
+
+    def __init__(self) -> None:
         self.otii = None
 
     def connect(self, *,
-                host = DEFAULT_HOST,
-                port = DEFAULT_PORT,
-                try_for_seconds = DEFAULT_CONNECTION_TIMEOUT,
-                licensing = DEFAULT_LICENSING_MODE,
-                credentials = DEFAULT_CREDENTIALS,
-                licenses = DEFAULT_LICENSES,
-                ):
+                host: str = DEFAULT_HOST,
+                port: int = DEFAULT_PORT,
+                try_for_seconds: int = DEFAULT_CONNECTION_TIMEOUT,
+                licensing: LicensingMode = DEFAULT_LICENSING_MODE,
+                credentials: str = DEFAULT_CREDENTIALS,
+                licenses: Optional[list[str]] = DEFAULT_LICENSES,
+                ) -> Connect:
         """ Connect to Otii.
 
         Setting the licensing parameter to AUTO:
@@ -170,6 +178,8 @@ class OtiiClient:
         self.otii = Connect(host, port, try_for_seconds, licensing, credentials, licenses)
         return self.otii
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """ Disconnect from Otii. """
-        self.otii.disconnect()
+        if self.otii is not None:
+            self.otii.disconnect()
+            self.otii = None

@@ -3,25 +3,25 @@ import argparse
 import sys
 from otii_tcp_client import otii_connection, otii as otii_application
 
-def login(otii, username, password):
+def login(otii: otii_application.Otii, username: str, password: str) -> None:
     otii.login(username, password)
 
-def logout(otii):
+def logout(otii: otii_application.Otii) -> None:
     otii.logout()
 
-def list_licenses(otii):
+def list_licenses(otii: otii_application.Otii) -> None:
     licenses = otii.get_licenses()
     print(f'{"  Id"} {"Type":12} {"Reserved to":15} Hostname')
     for license in licenses:
         print(f'{license["id"]:4d} {license["type"]:12} {license["reservedTo"]:15} {license["hostname"]}')
 
-def reserve_license(otii, id):
+def reserve_license(otii: otii_application.Otii, id: int) -> None:
     otii.reserve_license(id)
 
-def return_license(otii, id):
+def return_license(otii: otii_application.Otii, id: int) -> None:
     otii.return_license(id)
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description='Otii Control')
     subparsers = parser.add_subparsers(dest='command', title='commands', required=True)
 

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-module-docstring
-from otii_tcp_client import otii_exception
+from typing import Literal
+from otii_tcp_client import otii_connection, otii_exception
+
+BatteryEmulatorMode = Literal["keep_soc", "reset"]
 
 class BatteryEmulator:
     """ Class to define a Battery Emulator object.
@@ -10,7 +13,10 @@ class BatteryEmulator:
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, battery_emulator_id, connection):
+    id: str
+    connection: otii_connection.OtiiConnection
+
+    def __init__(self, battery_emulator_id: str, connection: otii_connection.OtiiConnection) -> None:
         """
         Args:
             battery_emulator_id (string): Id of the battery emulator.
@@ -20,7 +26,7 @@ class BatteryEmulator:
         self.id = battery_emulator_id
         self.connection = connection
 
-    def get_parallel(self):
+    def get_parallel(self) -> int:
         """ Get current number of emulated batteries in parallel.
 
         Returns:
@@ -34,7 +40,7 @@ class BatteryEmulator:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_series(self):
+    def get_series(self) -> int:
         """ Get current number of simulated batteries in series.
 
         Returns:
@@ -48,7 +54,7 @@ class BatteryEmulator:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_soc(self):
+    def get_soc(self) -> float:
         """ Get State of Charge.
 
         Returns:
@@ -66,7 +72,7 @@ class BatteryEmulator:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_soc_tracking(self):
+    def get_soc_tracking(self) -> bool:
         """ Get current state of battery emulator State of Charge tracking.
 
         Returns:
@@ -80,7 +86,7 @@ class BatteryEmulator:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["enabled"]
 
-    def get_used_capacity(self):
+    def get_used_capacity(self) -> float:
         """ Get current battery emulator used capacity.
 
         Returns:
@@ -94,7 +100,7 @@ class BatteryEmulator:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def set_soc(self, value):
+    def set_soc(self, value: float) -> None:
         """ Set State of Charge.
 
         Args:
@@ -114,7 +120,7 @@ class BatteryEmulator:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_soc_tracking(self, enable):
+    def set_soc_tracking(self, enable: bool) -> None:
         """ Set State of Charge tracking.
 
         Args:
@@ -127,7 +133,7 @@ class BatteryEmulator:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_used_capacity(self, value):
+    def set_used_capacity(self, value: float) -> None:
         """ Set used capacity.
 
         Args:
@@ -140,7 +146,7 @@ class BatteryEmulator:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def update_profile(self, battery_profile_id, mode):
+    def update_profile(self, battery_profile_id: str, mode: BatteryEmulatorMode) -> None:
         """ Update battery profile.
 
         Args:

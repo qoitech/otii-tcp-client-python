@@ -14,7 +14,8 @@ using the following format:
 '''
 import time
 from datetime import datetime
-from otii_tcp_client import otii_client
+from typing import Literal, Optional
+from otii_tcp_client import arc, otii_client, recording
 
 # Sweep settings
 START_VOLTAGE = 4.2
@@ -28,8 +29,9 @@ BAUDRATE = 115200
 DIGITAL_VOLTAGE = 3.3
 
 # Condition type
-INITIAL_CONDITION_TYPE = 'message' # 'message', 'falling_edge' or 'gpio'
-CONDITION_TYPE = 'message' # 'message', 'falling_edge' or 'gpio'
+ConditionType = Literal["message", "falling_edge", "gpio"]
+INITIAL_CONDITION_TYPE: ConditionType = 'message'
+CONDITION_TYPE: ConditionType = 'message'
 
 # Condition - wait for message
 MESSAGE_TEXT = 'Entering sleep mode'
@@ -49,7 +51,7 @@ GPI1_TIMEOUT = 60
 class AppException(Exception):
     '''Application Exception'''
 
-def voltage_sweep(otii):
+def voltage_sweep(otii: otii_client.Connect) -> None:
     '''
     This example shows how an automatic voltage sweep can be done, triggering on
     an UART message, a falling edge in current measurement or a GPI change.
@@ -83,6 +85,7 @@ def voltage_sweep(otii):
     device.set_main(True)
 
     recording = project.get_last_recording()
+    assert recording is not None
     timestamp_condition = wait_for_condition(INITIAL_CONDITION_TYPE, recording, device)
     recording.rename('Initialization')
 
@@ -99,6 +102,7 @@ def voltage_sweep(otii):
         project.start_recording()
 
         recording = project.get_last_recording()
+        assert recording is not None
         timestamp_condition = wait_for_condition(CONDITION_TYPE, recording, device)
         if timestamp_condition is not None:
             print(f'Condition {CONDITION_TYPE} found at timestamp: {timestamp_condition}')
@@ -113,7 +117,7 @@ def voltage_sweep(otii):
 
     print('Done!')
 
-def wait_for_condition(condition_type, recording, device):
+def wait_for_condition(condition_type: ConditionType, recording: recording.Recording, device: arc.Arc) -> Optional[float]:
     ''' Wait for a condition '''
     if condition_type == 'message':
         return wait_for_message(recording, device)
@@ -126,7 +130,7 @@ def wait_for_condition(condition_type, recording, device):
 
     raise AppException(f'Unknown condition type {condition_type}')
 
-def wait_for_message(recording, device):
+def wait_for_message(recording: recording.Recording, device: arc.Arc) -> Optional[float]:
     ''' Wait for message on UART '''
     start_time = datetime.now()
     found_message = False
@@ -160,7 +164,7 @@ def wait_for_message(recording, device):
 
     return timestamp
 
-def wait_for_falling_edge(recording, device):
+def wait_for_falling_edge(recording: recording.Recording, device: arc.Arc) -> Optional[float]:
     ''' Wait for falling edge '''
     start_time = datetime.now()
     from_time = 0
@@ -183,7 +187,7 @@ def wait_for_falling_edge(recording, device):
             print('Maximum time reached, not found falling edge')
             return None
 
-def wait_for_gpi(recording, device):
+def wait_for_gpi(recording: recording.Recording, device: arc.Arc) -> Optional[float]:
     ''' Wait for GPI change '''
     start_time = datetime.now()
     last_count = 0
@@ -221,7 +225,7 @@ def wait_for_gpi(recording, device):
             print('Maximum time reached, not found falling edge')
             return None
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

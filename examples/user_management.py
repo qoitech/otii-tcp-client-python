@@ -27,7 +27,7 @@ ABBREVATIONS = {
 class AppException(Exception):
     '''Application Exception'''
 
-def list_and_reserve_licenses(otii):
+def list_and_reserve_licenses(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to login,
     list licenses, reserve and return a license,
@@ -63,7 +63,7 @@ def list_and_reserve_licenses(otii):
     otii.return_license(credentials['license_id'])
     otii.logout()
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect(licensing = otii_client.LicensingMode.MANUAL) as otii:

@@ -16,14 +16,19 @@ using the following format:
 
 '''
 import unittest
-from otii_tcp_client import otii_client, otii_exception
+from otii_tcp_client import arc, otii_client, otii_exception
 
 MODEL = 'LM17500'
 MODEL2 = 'CR2450'
 
 class TestBatteryEmulator(unittest.TestCase):
+    otii: otii_client.Connect
+    devices: list[arc.Arc]
+    device: arc.Arc
+    battery_profiles: dict
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         # Connect to the Otii 3 application
         client = otii_client.OtiiClient()
         cls.otii = client.connect(licenses = [ 'Automation', 'Battery' ])
@@ -44,11 +49,11 @@ class TestBatteryEmulator(unittest.TestCase):
                 cls.battery_profiles[profile['model']] = profile
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         # Disconnect from the Otii 3 application
         cls.otii.disconnect()
 
-    def test_set_supply_to_battery_emulator_used_capacity(self):
+    def test_set_supply_to_battery_emulator_used_capacity(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -89,7 +94,7 @@ class TestBatteryEmulator(unittest.TestCase):
         soc_tracking = battery_emulator.get_soc_tracking()
         self.assertFalse(soc_tracking)
 
-    def test_set_supply_to_battery_emulator_soc(self):
+    def test_set_supply_to_battery_emulator_soc(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -129,7 +134,7 @@ class TestBatteryEmulator(unittest.TestCase):
         soc_tracking = battery_emulator.get_soc_tracking()
         self.assertTrue(soc_tracking)
 
-    def test_set_supply_with_default_values(self):
+    def test_set_supply_with_default_values(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -159,7 +164,7 @@ class TestBatteryEmulator(unittest.TestCase):
         soc_tracking = battery_emulator.get_soc_tracking()
         self.assertTrue(soc_tracking)
 
-    def test_setting_both_soc_and_used_capacity_should_fail(self):
+    def test_setting_both_soc_and_used_capacity_should_fail(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -177,7 +182,7 @@ class TestBatteryEmulator(unittest.TestCase):
                                                )
         self.assertEqual(cm.exception.type, 'Invalid key value')
 
-    def test_setting_supply_should_open_relay(self):
+    def test_setting_supply_should_open_relay(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -195,7 +200,7 @@ class TestBatteryEmulator(unittest.TestCase):
                                            )
         self.assertFalse(device.get_main())
 
-    def test_update_battery_profile_keeping_soc(self):
+    def test_update_battery_profile_keeping_soc(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -222,7 +227,7 @@ class TestBatteryEmulator(unittest.TestCase):
         soc = battery_emulator.get_soc()
         self.assertAlmostEqual(soc, last_soc, 3)
 
-    def test_update_battery_profile_resetting(self):
+    def test_update_battery_profile_resetting(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -250,7 +255,7 @@ class TestBatteryEmulator(unittest.TestCase):
         soc = battery_emulator.get_soc()
         self.assertAlmostEqual(soc, 100)
 
-    def test_change_used_capacity(self):
+    def test_change_used_capacity(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 
@@ -268,7 +273,7 @@ class TestBatteryEmulator(unittest.TestCase):
         battery_emulator.set_used_capacity(52)
         self.assertAlmostEqual(battery_emulator.get_used_capacity(), 52)
 
-    def test_change_soc(self):
+    def test_change_soc(self) -> None:
         device = TestBatteryEmulator.device
         battery_profiles = TestBatteryEmulator.battery_profiles
 

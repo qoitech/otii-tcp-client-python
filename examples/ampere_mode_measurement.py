@@ -21,7 +21,7 @@ VOLTAGE_THRESHOLD = 2.8
 class AppException(Exception):
     '''Application Exception'''
 
-def ampere_mode_measurement(otii):
+def ampere_mode_measurement(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to compute the actual current
     consumption using the real power source of the device.
@@ -58,6 +58,7 @@ def ampere_mode_measurement(otii):
 
     # Loop until voltage is below threshold
     recording = project.get_last_recording()
+    assert recording is not None
     from_time = 0
     to_time = 0
     while True:
@@ -86,7 +87,7 @@ def ampere_mode_measurement(otii):
     print(f'Energy:   {energy} Wh')
     print(f'Capacity: {capacity} Ah')
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

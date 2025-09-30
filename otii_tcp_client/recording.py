@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-module-docstring
+import datetime
 import unicodedata
+from typing import Generator, Optional
 from dateutil.parser import isoparse
-from otii_tcp_client import otii_exception
+from otii_tcp_client import otii_connection, otii_exception
 
 CHUNK_SIZE = 40000
 
-def remove_control_characters(s):
+def remove_control_characters(s: str) -> str:
     # pylint: disable=missing-function-docstring
     return "".join(ch for ch in s if unicodedata.category(ch)[0] != "C")
 
@@ -21,7 +23,12 @@ class Recording:
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, recording_dict, connection):
+    id: int
+    name: str
+    start_time: Optional[datetime.datetime]
+    connection: otii_connection.OtiiConnection
+
+    def __init__(self, recording_dict: dict, connection: otii_connection.OtiiConnection):
         """
         Args:
             recording_dict (dict): Dictionary with recording parameters.
@@ -35,7 +42,7 @@ class Recording:
         self.measurements = recording_dict.get("measurements")
         self.connection = connection
 
-    def delete(self):
+    def delete(self) -> None:
         """ Delete the recording.
 
         """
@@ -46,7 +53,7 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         self.id = -1
 
-    def downsample_channel(self, device_id, channel, factor):
+    def downsample_channel(self, device_id: str, channel: str, factor: int) -> None:
         """ Downsample all recordings on a channel.
 
         .. table:: Channels available for downsampling
@@ -81,7 +88,7 @@ class Recording:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def get_channel_data_count(self, device_id, channel):
+    def get_channel_data_count(self, device_id: str, channel: str) -> int:
         """ Get number of data entries in a channel for the recording.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -101,7 +108,7 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["count"]
 
-    def get_channel_data_index(self, device_id, channel, timestamp):
+    def get_channel_data_index(self, device_id: str, channel: str, timestamp: float) -> int:
         """ Get the index of a data entry in a channel for a given timestamp for the recording.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -122,7 +129,7 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["index"]
 
-    def get_channel_data(self, device_id, channel, index, count, strip = True):
+    def get_channel_data(self, device_id: str, channel: str, index: int, count: int, strip: bool = True) -> dict:
         """ Get data entries from a specified channel of a specific recording.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -182,6 +189,7 @@ class Recording:
                 }
 
         """
+        request: dict = {}
         if channel in [ "rx", "i1", "i2" ]:
             request_data = {"device_id": device_id, "recording_id": self.id, "channel": channel, "index": index, "count":count}
             request = {"type": "request", "cmd": "recording_get_channel_data", "data": request_data}
@@ -214,7 +222,7 @@ class Recording:
             index += chunk
         return data
 
-    def get_channel_info(self, device_id, channel):
+    def get_channel_info(self, device_id: str, channel: str) -> dict:
         """ Get information for a channel in the recording.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -248,7 +256,7 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]
 
-    def get_channel_statistics(self, device_id, channel, from_time, to_time):
+    def get_channel_statistics(self, device_id: str, channel: str, from_time: float, to_time: float) -> dict:
         """ Get statistics for a channel for a given time interval in the recording.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -281,8 +289,8 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]
 
-    def get_log_offset(self, device_id, channel):
-        # pylint: disable=missing-class-docstring
+    def get_log_offset(self, device_id: str, channel: str) -> float:
+        # pylint: disable=missing-function-docstring
         data = {"recording_id": self.id, "channel": channel}
         if device_id is not None:
             data["device_id"] = device_id
@@ -292,11 +300,11 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["offset"]
 
-    def get_offset(self):
+    def get_offset(self) -> float:
         """ Get the offset of the recording
 
         Returns:
-            int: The offset of the recording
+            float: The offset of the recording
 
         """
         data = {"recording_id": self.id}
@@ -306,8 +314,8 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["offset"]
 
-    def import_log(self, filename, converter):
-        # pylint: disable=missing-class-docstring
+    def import_log(self, filename: str, converter: str) -> str:
+        # pylint: disable=missing-function-docstring
         data = {"recording_id": self.id, "filename": filename, "converter": converter}
         request = {"type": "request", "cmd": "recording_import_log", "data": data}
         # Set timeout to None (blocking) as command can operate over large quantities of data to avoid timeout
@@ -316,8 +324,8 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["log_id"]
 
-    def is_running(self):
-        # pylint: disable=missing-class-docstring
+    def is_running(self) -> bool:
+        # pylint: disable=missing-function-docstring
         data = {"recording_id": self.id}
         request = {"type": "request", "cmd": "recording_is_running", "data": data}
         response = self.connection.send_and_receive(request)
@@ -325,15 +333,15 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["running"]
 
-    def log(self, text, timestamp = 0):
-        # pylint: disable=missing-class-docstring
+    def log(self, text: str, timestamp: float = 0) -> None:
+        # pylint: disable=missing-function-docstring
         data = {"recording_id": self.id, "text": text, "timestamp": timestamp}
         request = {"type": "request", "cmd": "recording_log", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def rename(self, name):
+    def rename(self, name: str) -> None:
         """ Change the name of the recording.
 
         Args:
@@ -347,8 +355,8 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
         self.name = name
 
-    def set_log_offset(self, device_id, channel, offset):
-        # pylint: disable=missing-class-docstring
+    def set_log_offset(self, device_id: str, channel: str, offset: float) -> None:
+        # pylint: disable=missing-function-docstring
         data = {"recording_id": self.id, "channel": channel, "offset": offset}
         if device_id is not None:
             data["device_id"] = device_id
@@ -357,7 +365,7 @@ class Recording:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_offset(self, offset):
+    def set_offset(self, offset: float) -> None:
         """ Set the offset of the recording
 
         Args:
@@ -371,7 +379,7 @@ class Recording:
             raise otii_exception.Otii_Exception(response)
 
 
-    def append_user_log(self, user_log_id, time, message):
+    def append_user_log(self, user_log_id: str, time: float, message: str) -> None:
         """ Append a timestamped message to user log
 
         Args:
@@ -386,7 +394,7 @@ class Recording:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def offset_user_log(self, user_log_id, offset):
+    def offset_user_log(self, user_log_id: str, offset: float) -> None:
         """ Offset a user log
 
         Args:
@@ -400,17 +408,16 @@ class Recording:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-
     class LogEntry:
-        def __init__(self, timestamp, message):
+        def __init__(self, timestamp: float, message: str):
             self.timestamp = timestamp
             self.message = message
 
-        def __str__(self):
+        def __str__(self) -> str:
             return f"time: {self.timestamp}, message: {self.message}"
 
 
-    def get_user_log_data(self, user_log_id, time_from, time_to, filter_string, page = 1, page_size = 1000):
+    def get_user_log_data(self, user_log_id: str, time_from: float, time_to: float, filter_string: str, page: int = 1, page_size: int = 1000) -> dict:
         """ Get data from user log
 
         Args:
@@ -420,6 +427,22 @@ class Recording:
             filter_string (str): Filter to apply to records
             page (int): Page number to get
             page_size (int): Number of records in one page
+
+        Returns:
+            User log::
+
+                    {
+                        "data_type": "log_data",
+                        "page": 0,
+                        "pages_total": 3,
+                        values: [{
+                            timestamp: 0.113,
+                            value: "Connecting..."
+                        }, {
+                            timestamp: 1.231,
+                            value: "Connected!"
+                        }]
+                    }
 
         """
 
@@ -432,7 +455,7 @@ class Recording:
         return response["data"]
 
 
-    def iter_user_log_data(self, user_log_id, time_from, time_to, filter_string = ""):
+    def iter_user_log_data(self, user_log_id: str, time_from: float, time_to: float, filter_string: str = "") -> Generator:
         """ Get an iterator to user log data
 
         Args:
@@ -440,6 +463,9 @@ class Recording:
             time_from (float): Start of the range in seconds
             time_to (float): End of the range in seconds
             filter_string (str): Filter to apply to messages
+
+        Returns:
+            Generator
         """
 
         page = self.get_user_log_data(user_log_id, time_from, time_to, filter_string, 1)

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 #coding: utf-8
 # pylint: disable=missing-module-docstring
+from typing import Any, Literal, Optional, Union
+from otii_tcp_client import otii_connection, otii_exception, battery_emulator
 
-from otii_tcp_client import otii_exception, battery_emulator
+DeviceType = Literal["Arc", "Ace", "Simulator"]
+PowerRegulation = Literal["voltage", "current", "inline", "off"]
+Range = Literal["low", "high"]
 
 class Arc:
     """ Class to define an Arc or Ace device.
@@ -15,7 +19,12 @@ class Arc:
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, device_dict, connection):
+    type: DeviceType
+    id: str
+    name: str
+    connection: otii_connection.OtiiConnection
+
+    def __init__(self, device_dict: dict, connection: otii_connection.OtiiConnection) -> None:
         """
         Args:
             device_dict (dict): Dictionary with Arc parameters.
@@ -27,7 +36,7 @@ class Arc:
         self.name = device_dict["name"]
         self.connection = connection
 
-    def add_to_project(self):
+    def add_to_project(self) -> None:
         """ Add device to current project.
 
         """
@@ -43,7 +52,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def calibrate(self):
+    def calibrate(self) -> None:
         """ Perform internal calibration of an Arc device.
 
         """
@@ -53,7 +62,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_5v(self, enable):
+    def enable_5v(self, enable: Union[bool, int]) -> None:
         """ Enable or disable 5V pin.
 
         Args:
@@ -66,15 +75,15 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_battery_profiling(self, enable):
-        # pylint: disable=missing-class-docstring
+    def enable_battery_profiling(self, enable: bool) -> None:
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "enable": enable}
         request = {"type": "request", "cmd": "arc_enable_battery_profiling", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_channel(self, channel, enable):
+    def enable_channel(self, channel: str, enable: bool) -> None:
         """ Enable or disable measurement channel.
 
         .. table:: Available channels
@@ -109,7 +118,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_exp_port(self, enable):
+    def enable_exp_port(self, enable: bool) -> None:
         """ Enable expansion port.
 
         Args:
@@ -122,7 +131,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_legacy_sink(self, enable):
+    def enable_legacy_sink(self, enable: bool) -> None:
         """ Enable or disable legacy sink mode.
 
         Args:
@@ -135,7 +144,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def enable_uart(self, enable):
+    def enable_uart(self, enable: bool) -> None:
         """ Enable UART.
 
         Args:
@@ -148,7 +157,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def get_4wire(self):
+    def get_4wire(self) -> str:
         """ Get the 4-wire measurement state.
 
         Returns:
@@ -162,7 +171,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_adc_resistor(self):
+    def get_adc_resistor(self) -> float:
         """ Get adc resistor value.
 
         Returns:
@@ -176,7 +185,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_channel_samplerate(self, channel):
+    def get_channel_samplerate(self, channel: str) -> int:
         """ Get channel sample rate.
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -195,7 +204,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_exp_voltage(self):
+    def get_exp_voltage(self) -> float:
         """ Get the voltage of the expansion port.
 
         Returns:
@@ -209,7 +218,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_gpi(self, pin):
+    def get_gpi(self, pin: int) -> bool:
         """ Get the state of one of the GPI pins.
 
         Args:
@@ -226,7 +235,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_main(self):
+    def get_main(self) -> bool:
         """ Get the state of the main power.
 
         Returns:
@@ -240,7 +249,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_main_voltage(self):
+    def get_main_voltage(self) -> float:
         """ Get main voltage value.
 
         Returns:
@@ -254,7 +263,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_max_current(self):
+    def get_max_current(self) -> float:
         """ Get the max allowed current.
 
         Returns:
@@ -268,7 +277,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_range(self):
+    def get_range(self) -> str:
         """ Get the current measurement range on the main output.
 
         Returns:
@@ -282,7 +291,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["range"]
 
-    def get_rx(self):
+    def get_rx(self) -> bool:
         """ The RX pin can be used as a GPI when the UART is disabled.
 
         Returns:
@@ -296,7 +305,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_src_cur_limit_enabled(self):
+    def get_src_cur_limit_enabled(self) -> bool:
         """ Get current state of voltage source current limiting.
 
         Returns:
@@ -310,7 +319,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["enabled"]
 
-    def get_supply_mode(self):
+    def get_supply_mode(self) -> str:
         """ Get current supply mode
 
         Returns:
@@ -328,7 +337,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["supply_mode"]
 
-    def get_uart_baudrate(self):
+    def get_uart_baudrate(self) -> int:
         """ Get the UART baud rate.
 
         Returns:
@@ -342,7 +351,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_value(self, channel):
+    def get_value(self, channel: str) -> float:
         """ Get value from specified channel.
 
         This is not available for the rx channel.
@@ -363,7 +372,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def get_version(self):
+    def get_version(self) -> dict:
         """ Get hardware and firmware versions of device.
 
         Returns:
@@ -377,7 +386,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
         """ Check if a device is connected.
 
         Returns:
@@ -391,7 +400,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["connected"]
 
-    def set_4wire(self, enable):
+    def set_4wire(self, enable: bool) -> None:
         """ Enable/disable 4-wire measurements using Sense+/-.
 
         Args:
@@ -404,7 +413,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_adc_resistor(self, value):
+    def set_adc_resistor(self, value: float) -> None:
         """ Set the value of the shunt resistor for the ADC.
 
         Args:
@@ -417,15 +426,15 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_battery_profile(self, value):
-        # pylint: disable=missing-class-docstring
+    def set_battery_profile(self, value: str) -> None:
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "value": value}
         request = {"type": "request", "cmd": "arc_set_battery_profile", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_channel_samplerate(self, channel, value):
+    def set_channel_samplerate(self, channel: str, value: int) -> None:
         """ Set the sample rate of a channel
 
         For available channels see :py:meth:`.Arc.enable_channel`
@@ -441,7 +450,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_exp_voltage(self, value):
+    def set_exp_voltage(self, value: float) -> None:
         """ Set the voltage of the expansion port.
 
         Args:
@@ -454,7 +463,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_gpo(self, pin, value):
+    def set_gpo(self, pin: int, value: bool) -> None:
         """ Set the state of one of the GPO pins.
 
         Args:
@@ -468,7 +477,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_main(self, enable):
+    def set_main(self, enable: bool) -> None:
         """ Turn on or off main power on a device.
 
         Args:
@@ -481,7 +490,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_main_current(self, value):
+    def set_main_current(self, value: float) -> None:
         """ Set the main current on Arc. Used when the Otii device is set in constant current mode.
 
         Args:
@@ -494,7 +503,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_main_voltage(self, value):
+    def set_main_voltage(self, value: float) -> None:
         """ Set the main voltage on Arc.
 
         Args:
@@ -507,7 +516,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_max_current(self, value):
+    def set_max_current(self, value: float) -> None:
         """ When the current exceeds this value, the main power will cut off.
 
         Args:
@@ -520,11 +529,11 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_power_regulation(self, mode):
+    def set_power_regulation(self, mode: PowerRegulation) -> None:
         """ Set power regulation mode.
 
         Args:
-            mode (float): One of the following: "voltage", "current", "inline", "off".
+            mode (str): One of the following: "voltage", "current", "inline", "off".
 
         """
         data = {"device_id": self.id, "mode": mode}
@@ -533,20 +542,20 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_range(self, range):
+    def set_range(self, arange: Range) -> None:
         """ Set the main outputs measurement range.
 
         Args:
             range (str): Current measurement range mode to set on main. "low" enables auto-range, "high" force high-range.
 
         """
-        data = {"device_id": self.id, "range": range}
+        data = {"device_id": self.id, "range": arange}
         request = {"type": "request", "cmd": "arc_set_range", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_src_cur_limit_enabled(self, enable):
+    def set_src_cur_limit_enabled(self, enable: bool) -> None:
         """ Enable voltage source current limit (CC) operation.
 
         Args:
@@ -561,14 +570,14 @@ class Arc:
 
     def set_supply_battery_emulator(
         self,
-        battery_profile_id,
+        battery_profile_id: str,
         *,
-        series = 1,
-        parallel = 1,
-        used_capacity = None,
-        soc = None,
-        soc_tracking = True,
-    ):
+        series: int = 1,
+        parallel: int = 1,
+        used_capacity: Optional[float] = None,
+        soc: Optional[float] = None,
+        soc_tracking: bool = True,
+    ) -> battery_emulator.BatteryEmulator:
         """ Set power supply to battery emulator.
 
         It is only possible to set one of **used_capacity** and **soc**. If neither is set,
@@ -605,7 +614,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return battery_emulator.BatteryEmulator(response["data"]["battery_emulator_id"], self.connection)
 
-    def set_supply_power_box(self):
+    def set_supply_power_box(self) -> None:
         """ Set power supply to power box.
         """
         data = {"device_id": self.id}
@@ -614,7 +623,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_tx(self, value):
+    def set_tx(self, value: bool) -> None:
         """ The TX pin can be used as a GPO when the UART is disabled.
 
         Args:
@@ -627,7 +636,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_uart_baudrate(self, value):
+    def set_uart_baudrate(self, value: int) -> None:
         """ Set UART baud rate.
 
         Args:
@@ -640,8 +649,8 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def wait_for_battery_data(self, timeout):
-        # pylint: disable=missing-class-docstring
+    def wait_for_battery_data(self, timeout: float) -> float:
+        # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "timeout": timeout}
         request = {"type": "request", "cmd": "arc_wait_for_battery_data", "data": data}
         response = self.connection.send_and_receive(request, 60 + (timeout / 1000))
@@ -649,7 +658,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["value"]
 
-    def write_tx(self, value):
+    def write_tx(self, value: str) -> None:
         """ Write data to TX.
 
         Args:
@@ -662,7 +671,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def get_property(self, name):
+    def get_property(self, name: str) -> Any:
         # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "name": name}
         request = {"type": "request", "cmd": "arc_get_property", "data": data}
@@ -671,7 +680,7 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"].get("value", None)
 
-    def set_property(self, name, value):
+    def set_property(self, name: str, value: Any) -> None:
         # pylint: disable=missing-function-docstring
         data = {"device_id": self.id, "name": name, "value": value}
         request = {"type": "request", "cmd": "arc_set_property", "data": data}
@@ -679,7 +688,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def commit(self):
+    def commit(self) -> None:
         # pylint: disable=missing-function-docstring
         data = {"device_id": self.id}
         request = {"type": "request", "cmd": "arc_commit", "data": data}
@@ -687,7 +696,7 @@ class Arc:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def firmware_upgrade(self, filename = None):
+    def firmware_upgrade(self, filename: Optional[str] = None) -> None:
         """ Initiate device firmware update.
 
         Args:

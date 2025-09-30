@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-module-docstring
+from typing import Optional
 from otii_tcp_client import otii_connection, otii_exception, project, arc
+
+# pylint: disable=missing-class-docstring
+class OtiiException(Exception): ...
 
 class Otii:
     """ Class to define an Otii object.
@@ -9,7 +13,9 @@ class Otii:
         connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
 
     """
-    def __init__(self, connection=None):
+    connection: otii_connection.OtiiConnection
+
+    def __init__(self, connection: otii_connection.OtiiConnection) -> None:
         """
         Args:
             connection (:py:class:`.OtiiConnection`): Object to handle connection to the Otii server.
@@ -17,7 +23,7 @@ class Otii:
         """
         self.connection = connection
 
-    def create_project(self):
+    def create_project(self) -> project.Project:
         """ Create a new project.
 
         Returns:
@@ -30,7 +36,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return project.Project(response["data"]["project_id"], self.connection)
 
-    def get_active_project(self):
+    def get_active_project(self) -> project.Project:
         """ Returns the active project if there is one.
 
         Returns:
@@ -42,17 +48,17 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
         if response["data"]["project_id"] == -1:
-            return None
+            raise OtiiException('Cannot get active project')
         return project.Project(response["data"]["project_id"], self.connection)
 
-    def get_battery_profile_info(self, battery_profile_id):
+    def get_battery_profile_info(self, battery_profile_id: str) -> dict:
         """ Returns informatiion about a battery profile.
 
         Args:
             battery_profile_id (string): Battery profile id.
 
         Returns:
-            Battery profile info::
+            dict: Battery profile info::
 
                 {
                     "battery_profile_id":"6ef4a003-22c6-44d1-9e37-21de0526f5f2"
@@ -78,6 +84,7 @@ class Otii:
                         "dischargetable_id":"22dbed46-1b83-4e04-8964-aa4e5187f3cc"
                     }]
                 }
+
         """
         data = {"battery_profile_id": battery_profile_id}
         request = {"type": "request", "cmd": "otii_get_battery_profile_info", "data": data}
@@ -86,7 +93,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]
 
-    def get_battery_profiles(self):
+    def get_battery_profiles(self) -> list[dict]:
         """ Returns a list of available battery profiles.
 
         Returns:
@@ -111,7 +118,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["battery_profiles"]
 
-    def get_device_id(self, device_name):
+    def get_device_id(self, device_name: str) -> str:
         """ Get device id from device name.
 
         Args:
@@ -128,7 +135,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["device_id"]
 
-    def get_devices(self, timeout = 10, devicefilter = None):
+    def get_devices(self, timeout: int = 10, devicefilter: Optional[tuple[arc.DeviceType]] = None) -> list[arc.Arc]:
         """ Get a list of connected devices.
 
         Args:
@@ -163,7 +170,7 @@ class Otii:
                 device_objects.append(device_object)
         return device_objects
 
-    def get_licenses(self):
+    def get_licenses(self) -> list[dict]:
         """ Return a list of all licenses for logged in user
 
         Returns:
@@ -190,11 +197,11 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["licenses"]
 
-    def has_license(self, license_type):
+    def has_license(self, license_type: str) -> bool:
         """ Check if user has a reserved license
 
             Args:
-                license_type: Type of licenses
+                license_type (str): Type of license
 
             Returns:
                 bool: True if license is reserved, otherwise False
@@ -206,7 +213,7 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["has_license"]
 
-    def is_logged_in(self):
+    def is_logged_in(self) -> bool:
         """ Check if user is logged in
 
             Returns:
@@ -218,12 +225,12 @@ class Otii:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["logged_in"]
 
-    def login(self, username, password):
+    def login(self, username: str, password: str) -> None:
         """ Login user
 
             Args:
-                username: Name of Otii user
-                password: Password of Otii user
+                username (str): Name of Otii user
+                password (str): Password of Otii user
         """
         data = {"username": username, "password": password}
         request = {"type": "request", "cmd": "otii_login", "data": data}
@@ -231,7 +238,7 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def logout(self):
+    def logout(self) -> None:
         """ Logout user
         """
         request = {"type": "request", "cmd": "otii_logout"}
@@ -239,7 +246,7 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def open_project(self, filename, force = False, progress = False):
+    def open_project(self, filename: str, force: bool = False, progress: bool = False) -> project.Project:
         """ Open an existing project.
 
         Args:
@@ -263,7 +270,7 @@ class Otii:
         proj.filename = response["data"]["filename"]
         return proj
 
-    def reserve_license(self, license_id):
+    def reserve_license(self, license_id: int) -> None:
         """ Reserve license
 
         Args:
@@ -275,7 +282,7 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def return_license(self, license_id):
+    def return_license(self, license_id: int) -> None:
         """ Return license
 
         Args:
@@ -287,7 +294,7 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def set_all_main(self, enable):
+    def set_all_main(self, enable: bool) -> None:
         """ Turn on or off the main power on all connected devices.
 
         Args:
@@ -300,7 +307,7 @@ class Otii:
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """ Shutdown Otii
 
         """

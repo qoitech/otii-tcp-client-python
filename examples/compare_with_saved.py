@@ -14,7 +14,7 @@ using the following format:
 '''
 import os
 import time
-from otii_tcp_client import otii_client
+from otii_tcp_client import otii_client, recording
 
 MEASUREMENT_DURATION = 5.0
 PROJECTS_FOLDER = os.path.join(os.getcwd(), 'projects')
@@ -24,7 +24,7 @@ MAX_NO_OF_RECORDINGS = 10
 class AppException(Exception):
     '''Application Exception'''
 
-def compare_with_saved(otii):
+def compare_with_saved(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to compare a new
     recording with a previously saved one.
@@ -73,10 +73,10 @@ def compare_with_saved(otii):
     # Get statistics for the last two recordings
     print_header()
     recordings = project.get_recordings()
-    for recording in recordings[-2:]:
-        info = recording.get_channel_info(device.id, 'mc')
-        statistics = recording.get_channel_statistics(device.id, 'mc', info['from'], info['to'])
-        print_statistics(recording, info, statistics)
+    for rec in recordings[-2:]:
+        info = rec.get_channel_info(device.id, 'mc')
+        statistics = rec.get_channel_statistics(device.id, 'mc', info['from'], info['to'])
+        print_statistics(rec, info, statistics)
 
     # Only keep the last recordings in the project defined by MAX_NO_OF_RECORDINGS
     if len(recordings) > MAX_NO_OF_RECORDINGS:
@@ -87,19 +87,19 @@ def compare_with_saved(otii):
     # Save the project
     project.save_as(PROJECT_FOLDER)
 
-def print_header():
+def print_header() -> None:
     ''' Prints the header for the statistics '''
     print('Recording             From (s)     To (s) Offset (s)  Sample rate    '
           'Min (A)    Max (A)  Average (A)    Energy (Wh)')
 
-def print_statistics(recording, info, statistics):
+def print_statistics(recording: recording.Recording, info: dict, statistics: dict) -> None:
     ''' Prints the statistics '''
     print(f'{recording.name} {info["from"]:10} {info["to"]:10} {info["offset"]:10}        '
           f'{info["sample_rate"]:5} ', end='')
     print(f'{statistics["min"]:10.5f} {statistics["max"]:10.5f}   {statistics["average"]:10.5f}   '
           f'{statistics["energy"] / 3600:12.6}')
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

@@ -15,7 +15,7 @@ using the following format:
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-from otii_tcp_client import otii_client
+from otii_tcp_client import arc, otii_client
 
 # Configure DC/DC sweep settings
 MEASUREMENT_DURATION = 1 # s, how long measurement to take average for
@@ -28,12 +28,12 @@ STOP_CURRENT = 200e-3 # A
 NUMBER_OF_CURRENT_STEP = 20 # number of steps for the logarithmic current sweep
 SOURCING_DEVICE_NAME = 'Ace_source' # Change this to the name of your sourcing device
 SINKING_DEVICE_NAME = 'Ace_sink' # Change this to the name of your sinking device
-SAMPLE_RATE = 1e3 # Samples per second
+SAMPLE_RATE = 1000 # Samples per second
 
 class AppException(Exception):
     '''Application Exception'''
 
-def setup(otii):
+def setup(otii: otii_client.Connect) -> tuple[arc.Arc, arc.Arc]:
     ''' Setup Otii device '''
     source_device = None
     sink_device = None
@@ -68,7 +68,7 @@ def setup(otii):
 
     return source_device, sink_device
 
-def measure_efficiency(otii):
+def measure_efficiency(otii: otii_client.Connect) -> list[list[list[float]]]:
     ''' Measure efficiency '''
     # Setup the devices
     source_device, sink_device = setup(otii)
@@ -86,6 +86,7 @@ def measure_efficiency(otii):
         source_device.set_main_voltage(voltage)
         project.start_recording()
         recording = project.get_last_recording()
+        assert(recording is not None)
         current_statistics = []
         for current in np.logspace(np.log10(START_CURRENT), np.log10(STOP_CURRENT), num=NUMBER_OF_CURRENT_STEP):
             sink_device.set_main_current(-current)
@@ -110,7 +111,7 @@ def measure_efficiency(otii):
 
     return data
 
-def plot_efficiency(data):
+def plot_efficiency(data: list[list[list[float]]]) -> None:
     ''' Plot the efficiency '''
     # Find the lowest efficiency value
     lowest_efficiency = min(
@@ -134,7 +135,7 @@ def plot_efficiency(data):
     plt.ylim(lowest_efficiency*0.95, 105)
     plt.show()
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

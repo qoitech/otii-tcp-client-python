@@ -20,7 +20,16 @@ classifiers = [
 ]
 dependencies = [
     "python-dateutil",
+    "typing-extensions",
 ]
 
 [project.urls]
 Homepage = "https://github.com/qoitech/otii-tcp-client-python"
+
+[tool.setuptools.package-data]
+otii_tcp_client = ["py.typed"]
+
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_calls = true
+disallow_untyped_defs = true

@@ -21,7 +21,7 @@ START_OF_CYCLE_MESSAGE = 'Connecting...'
 class AppException(Exception):
     '''Application Exception'''
 
-def sync_with_log(otii):
+def sync_with_log(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to use the log output
     to find the start and end point of a complete
@@ -72,6 +72,7 @@ def sync_with_log(otii):
 
     # Find at least two log messages
     recording = project.get_last_recording()
+    assert recording is not None
     count = recording.get_channel_data_count(device.id, 'rx')
     data = recording.get_channel_data(device.id, 'rx', 0, count)
     values = data['values']
@@ -99,7 +100,7 @@ def sync_with_log(otii):
     print(f'Average:     {statistics["average"]:.5} A')
     print(f'Energy:      {statistics["energy"] / 3600:.5} Wh')
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

@@ -20,7 +20,7 @@ MEASUREMENT_DURATION = 5.0
 class AppException(Exception):
     '''Application Exception'''
 
-def basic_measurement(otii):
+def basic_measurement(otii: otii_client.Connect) -> None:
     '''
     This example shows you how to configure and
     start a recording of the main current channel.
@@ -59,19 +59,21 @@ def basic_measurement(otii):
 
     # Get statistics for the recording
     recording = project.get_last_recording()
+    assert recording is not None
 
     print('Recording info')
     print('==============')
     print(f'Name:        {recording.name}')
     print(f'Start time:  {recording.start_time}')
     print('Measurements:')
-    for measurement in recording.measurements:
-        print('    ', end='')
-        print(f'Device: {measurement["device_id"]}', end='')
-        print(f', {measurement["channel"]}', end='')
-        if 'sample_rate' in measurement:
-            print(f', sample rate: {measurement["sample_rate"]}', end='')
-        print('')
+    if recording.measurements is not None:
+        for measurement in recording.measurements:
+            print('    ', end='')
+            print(f'Device: {measurement["device_id"]}', end='')
+            print(f', {measurement["channel"]}', end='')
+            if 'sample_rate' in measurement:
+                print(f', sample rate: {measurement["sample_rate"]}', end='')
+            print('')
     print('')
 
     info = recording.get_channel_info(device.id, 'mc')
@@ -91,7 +93,7 @@ def basic_measurement(otii):
     print(f'Average:     {statistics["average"]:.5} A')
     print(f'Energy:      {statistics["energy"] / 3600:.5} Wh')
 
-def main():
+def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''
     client = otii_client.OtiiClient()
     with client.connect() as otii:

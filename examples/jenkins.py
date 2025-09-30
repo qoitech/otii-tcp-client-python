@@ -44,7 +44,7 @@ class OtiiTest(unittest.TestCase):
     device = None
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         # Connect to Otii
         client = otii_client.OtiiClient()
         OtiiTest.otii = client.connect()
@@ -91,14 +91,17 @@ class OtiiTest(unittest.TestCase):
             time.sleep(1.0)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         if OtiiTest.otii is not None:
             OtiiTest.otii.disconnect()
 
-    def test_energy_consumption_using_rx(self):
+    def test_energy_consumption_using_rx(self) -> None:
         '''Test the energy consumption of the latest firmware'''
         otii = OtiiTest.otii
+        assert(otii is not None)
+
         device = OtiiTest.device
+        assert(device is not None)
 
         project = otii.get_active_project()
 
@@ -112,6 +115,8 @@ class OtiiTest(unittest.TestCase):
         project.stop_recording()
 
         recording = project.get_last_recording()
+        assert recording is not None
+
         index = 0
         count = recording.get_channel_data_count(device.id, 'rx')
         data = recording.get_channel_data(device.id, 'rx', index, count)
@@ -123,10 +128,13 @@ class OtiiTest(unittest.TestCase):
         self.assertLess(statistics['energy'], MAX_ENERGY, 'One interval consumes to much energy')
         self.assertGreater(statistics['energy'], MIN_ENERGY, 'One interval consumes to little energy, is everything up and running?')
 
-    def test_energy_consumption_using_gpi(self):
+    def test_energy_consumption_using_gpi(self) -> None:
         '''Test the energy consumption of the latest firmware'''
         otii = OtiiTest.otii
+        assert(otii is not None)
+
         device = OtiiTest.device
+        assert(device is not None)
 
         project = otii.get_active_project()
 
@@ -140,6 +148,8 @@ class OtiiTest(unittest.TestCase):
         project.stop_recording()
 
         recording = project.get_last_recording()
+        assert recording is not None
+
         index = 0
         count = recording.get_channel_data_count(device.id, 'i1')
         gpi1_data = recording.get_channel_data(device.id, 'i1', index, count)['values']
