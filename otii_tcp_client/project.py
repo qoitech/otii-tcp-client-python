@@ -152,7 +152,7 @@ class Project:
 
         """
 
-        data = {"project_id": self.id, "id": id}
+        data = {"project_id": self.id, "id": user_log_id}
         request = {"type": "request", "cmd": "project_create_user_log", "data": data}
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
