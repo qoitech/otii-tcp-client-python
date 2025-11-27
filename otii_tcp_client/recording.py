@@ -435,12 +435,12 @@ class Recording:
                         "data_type": "log_data",
                         "page": 0,
                         "pages_total": 3,
-                        values: [{
-                            timestamp: 0.113,
-                            value: "Connecting..."
+                        "values": [{
+                            "timestamp": 0.113,
+                            "value": "Connecting..."
                         }, {
-                            timestamp: 1.231,
-                            value: "Connected!"
+                            "timestamp": 1.231,
+                            "value": "Connected!"
                         }]
                     }
 

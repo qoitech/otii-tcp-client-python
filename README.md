@@ -4,6 +4,12 @@ The otii_tcp_client is a Python package for controlling the [Otii Automation Too
 
 Client v1.0.8 breaks compatibility with Otii 2, we recommend you to upgrade to Otii 3.
 
+New functionality in client v1.0.12 requiring [Otii software v3.6.0 or later](https://www.qoitech.com/download):
+
+- Added user logs. Create user defined logs while recording, or import user logs to an existing recording.
+- Added information about what measurements was included in each recording.
+- Added type information.
+
 New functionality in client v1.0.11 requiring [Otii software v3.5.5 or later](https://www.qoitech.com/download):
 
 - `otii.connect` now waits for both a valid connection and for a license to be available.
