@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75.8.2"]
+requires = ["setuptools>=80.9.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,10 +11,10 @@ authors = [
 description = "Qoitech Otii tcp client library"
 readme = "README.md"
 requires-python = ">=3.9"
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Build Tools",
     "Development Status :: 5 - Production/Stable",
 ]
