@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "matplotlib",
+#   "numpy",
+#   "otii_tcp_client",
+# ]
+# ///
 '''
 Otii 3 DC/DC efficiency
 

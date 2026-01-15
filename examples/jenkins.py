@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "otii_tcp_client",
+#   "unittest-xml-reporting",
+# ]
+# ///
 '''
 Running Otii 3 tests in Jenkins
 
@@ -17,9 +24,6 @@ using the following format:
         "username": "YOUR USERNAME",
         "password": "YOUR PASSWORD"
     }
-
-You also need to install the following dependencies:
-    python3 -m pip install unittest-xml-reporting
 
 '''
 import subprocess

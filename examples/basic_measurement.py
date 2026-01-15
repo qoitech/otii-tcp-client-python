@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "otii-tcp-client",
+# ]
+# ///
 '''
 Otii 3 Basic Measurement
 

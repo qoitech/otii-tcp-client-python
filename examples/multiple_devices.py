@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "otii_tcp_client",
+# ]
+# ///
 '''
 Otii 3 Multiple devices
 
