@@ -98,6 +98,7 @@ def basic_measurement(otii: otii_client.Connect) -> None:
     print(f'Max:         {statistics["max"]:.5} A')
     print(f'Average:     {statistics["average"]:.5} A')
     print(f'Energy:      {statistics["energy"] / 3600:.5} Wh')
+    print(f'Charge:      {statistics["charge"] / 3600:.5} Ah')
 
 def main() -> None:
     '''Connect to the Otii 3 application and run the measurement'''

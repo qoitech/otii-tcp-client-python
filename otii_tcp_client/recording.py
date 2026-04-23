@@ -272,13 +272,15 @@ class Recording:
 
                 {
                     # The minimum value in the selected interval.
-                    "min": -0,00565853156149387,
+                    "min": -0.0022288288455456495,
                     # The maximum value in the selected interval.
-                    "max": 0,476982802152634,
+                    "max": 0.3937658667564392,
                     # The average value in the selected interval.
-                    "average": 0,0561770809812117,
+                    "average": 0.07267125238497053,
                     # The energy consumed in the interval (if applicable).
-                    "energy": 0,000290418408670424
+                    "energy": 1.3418413478876214,
+                    # The total charge in the interval (if applicable)
+                    "charge": 0.3627022206533879
                 }
 
         """
