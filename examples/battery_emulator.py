@@ -38,13 +38,13 @@ class TestConfig(TypedDict):
     soc: list[int]
 
 TEST_SCHEME: list[TestConfig] = [{
-    'name': 'LiPo-ICP632136HPST-Renata-WiFi-20',
+    'name': 'LiPo_ICP632136HPST-Renata-(20)',
     'soc': [ 100, 50, 20 ],
 }, {
-    'name': 'LiPo-ICP632136HPST-Renata_WiFi-5',
+    'name': 'LiPo_ICP632136HPST-Renata-(5)',
     'soc': [ 100, 50, 20 ],
 }, {
-    'name': 'LiPo-ICP632136HPST-Renata-WiFi-(-10)',
+    'name': 'LiPo_ICP632136HPST-Renata-(-10)',
     'soc': [ 100, 50, 20 ],
 }]
 
