@@ -400,6 +400,19 @@ class Arc:
             raise otii_exception.Otii_Exception(response)
         return response["data"]["connected"]
 
+    def set_0_to_15_voltage(self, value: float) -> None:
+        """ Set voltage of 0-15 pin in Ace
+
+        Args:
+            value (float): 0-15 V, 0 turns off the output
+
+        """
+        data = {"device_id": self.id, "value": value}
+        request = {"type": "request", "cmd": "arc_set_0-15_voltage", "data": data}
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
     def set_4wire(self, enable: bool) -> None:
         """ Enable/disable 4-wire measurements using Sense+/-.
 
