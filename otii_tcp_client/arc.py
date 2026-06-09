@@ -4,7 +4,7 @@
 from typing import Any, Literal, Optional, Union
 from otii_tcp_client import otii_connection, otii_exception, battery_emulator
 
-DeviceType = Literal["Arc", "Ace", "Simulator"]
+DeviceType = Literal["Arc", "Ace", "Simulator", "Uart"]
 PowerRegulation = Literal["voltage", "current", "inline", "off"]
 Range = Literal["low", "high"]
 
