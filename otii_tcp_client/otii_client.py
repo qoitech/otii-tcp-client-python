@@ -98,11 +98,24 @@ class Connect(otii.Otii):
                 try:
                     self._reserve_license(all_licenses, wanted_license)
                     reserved = True
-                except OtiiClientException:
+                except (OtiiClientException, otii_exception.Otii_Exception) as exc:
+                    # (1) OtiiClientException indicates no free license in our snapshot.
+                    # (2) Otii_Exception "License could not be reserved" there was
+                    #     a free license but now we can't grab it, some other client
+                    #     has pulled it.
+                    # Both (1) and (2) are transient: back off, re-read the pool and
+                    # retry until try_until.
+                    # Any other error we sould raise immediately.
+                    if (
+                        isinstance(exc, otii_exception.Otii_Exception)
+                        and exc.type != "License could not be reserved"
+                    ):
+                        raise
                     if time.time() > try_until:
                         print('Timed out')
                         raise
-                    time.sleep(1.0)
+                    # Jittered backoff so synchronized clients desynchronize.
+                    time.sleep(random.uniform(0.5, 1.5))
                     all_licenses = self.get_licenses()
 
     def _reserve_license(self, all_licenses: list[dict], wanted_license: str) -> None:
@@ -124,7 +137,9 @@ class Connect(otii.Otii):
         ]
         if len(reserved_by_me) == 0:
             if len(available) > 0:
-                license_id = available[0]['id']
+                # Pick a random license to decrease likelihood of collision with
+                # other client pulling licenses at the same time.
+                license_id = random.choice(available)["id"]
                 self.reserve_license(license_id)
                 self.auto_reserved_licenses.append(license_id)
             else:
