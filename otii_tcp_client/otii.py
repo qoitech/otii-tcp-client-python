@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 # pylint: disable=missing-module-docstring
-from typing import Optional
+from typing import Literal, Optional, TypedDict
 from otii_tcp_client import otii_connection, otii_exception, project, arc
+
+class Credentials(TypedDict):
+    username: str
+    password: str
+
+LicenseType = Literal[ 'Automation', 'Battery' ]
+
+class SetupData(TypedDict):
+    auto_logged_in: bool
+    reserved_licenses: list[int]
 
 # pylint: disable=missing-class-docstring
 class OtiiException(Exception): ...
@@ -22,6 +32,18 @@ class Otii:
 
         """
         self.connection = connection
+
+    def cleanup(self, data: SetupData) -> None:
+        """ Cleanup licensing
+        """
+        request = {
+            "type": "request",
+            "cmd": "otii_cleanup",
+            "data": data,
+        }
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
 
     def create_project(self) -> project.Project:
         """ Create a new project.
@@ -306,6 +328,31 @@ class Otii:
         response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
+
+    def setup(self,
+              license_types: list[LicenseType],
+              try_for_seconds: int,
+              credentials: Optional[Credentials] = None,
+              ) -> SetupData:
+        """ Setup licensing
+        """
+        data = {
+            "license_types": license_types,
+            "try_for_seconds": try_for_seconds,
+            "credentials": credentials,
+        }
+        request = {
+            "type": "request",
+            "cmd": "otii_setup",
+            "data": data,
+        }
+        response = self.connection.send_and_receive(request)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+        return {
+            "auto_logged_in": response["data"]["auto_logged_in"],
+            "reserved_licenses": response["data"]["reserved_licenses"],
+        }
 
     def shutdown(self) -> None:
         """ Shutdown Otii
