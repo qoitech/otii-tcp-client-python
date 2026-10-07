@@ -5,6 +5,7 @@ from typing import Any, Literal, Optional, Union
 from otii_tcp_client import otii_connection, otii_exception, battery_emulator
 
 DeviceType = Literal["Arc", "Ace", "Simulator", "Uart"]
+GpioMode = Literal["input", "output"]
 PowerRegulation = Literal["voltage", "current", "inline", "off"]
 Range = Literal["low", "high"]
 
@@ -59,6 +60,19 @@ class Arc:
         data = {"device_id": self.id}
         request = {"type": "request", "cmd": "arc_calibrate", "data": data}
         response = self.connection.send_and_receive(request, 10)
+        if response["type"] == "error":
+            raise otii_exception.Otii_Exception(response)
+
+    def config_gpio(self, pin: int, value: GpioMode):
+        """ Configure GPIO pin mode
+
+        Args:
+            pin (int): ID of the GPIO pin to set mode of, 1 or 2.
+            value (string): Set to 'input' or 'output'.
+        """
+        data = {"device_id": self.id, "pin": pin, "value": value}
+        request = {"type": "request", "cmd": "arc_config_gpio", "data": data}
+        response = self.connection.send_and_receive(request)
         if response["type"] == "error":
             raise otii_exception.Otii_Exception(response)
 
