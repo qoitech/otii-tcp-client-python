@@ -76,7 +76,8 @@ def voltage_sweep(otii: otii_client.Connect) -> None:
 
     # Set sample rate
     for channel in ['mc', 'mv', 'mp']:
-        device.set_channel_samplerate(channel, 50000)
+        if device.type == "Ace":
+            device.set_channel_samplerate(channel, 50000)
 
     # Configure device
     device.set_main_voltage(START_VOLTAGE)
