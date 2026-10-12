@@ -73,7 +73,7 @@ LIMITS = {
 }
 
 MAX_CYCLES = 0              # 0 = run until Ctrl+C
-RESULTS_CSV = Path('anomality_results_simple.csv')
+RESULTS_CSV = Path('anomaly_results_simple.csv')
 
 class AppException(Exception):
     '''Application exception'''
